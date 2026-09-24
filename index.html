@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Strojírny Olšovec – MSV Brno 2026</title>
+<link rel="icon" href="assets/img/logo.png">
+<link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+
+<!-- ===== SMYČKA (bezobslužné přehrávání) ===== -->
+<section id="loop" aria-label="Informační smyčka">
+  <div class="dots" id="loopDots"></div>
+  <div class="fair"><b id="loopFair"></b><span id="loopFairSub"></span></div>
+  <div id="loopSlides"></div>
+  <div class="touch-hint"><span class="hand">👆</span> Dotkněte se obrazovky</div>
+  <div class="progress" id="loopProgress"></div>
+</section>
+
+<!-- ===== APLIKACE ===== -->
+<div id="app" class="hidden">
+  <header id="topbar">
+    <div class="logo" id="logoBtn"><img src="assets/img/logo.png" alt="Strojírny Olšovec"></div>
+    <div class="name">STROJÍRNY OLŠOVEC s.r.o.<small>„Zvládneme vyrobit téměř vše!“</small></div>
+    <div class="sect" id="sectName"></div>
+    <div class="clock" id="clock"></div>
+    <div class="idle" title="Návrat do smyčky"><svg viewBox="0 0 36 36"><circle id="idleRing" cx="18" cy="18" r="16" pathLength="100"/></svg></div>
+  </header>
+
+  <main id="main">
+    <!-- DOMŮ -->
+    <section class="page" id="p-home">
+      <div class="hero">
+        <div class="bg" style="background-image:url('assets/img/2023-misic-preprava.jpg')"></div>
+        <div class="shade"></div>
+        <div class="in">
+          <span class="pill heat" id="homeFair"></span>
+          <h2 style="margin-top:.8rem">Rodinná strojírna z Olšovce, která si poradí i s nekonvenčními zakázkami</h2>
+          <p>Zakázková strojírenská výroba od roku 1993 · obrábění · svařování · stroje a linky na míru · vlastní vývoj tepelného plynového motoru</p>
+        </div>
+      </div>
+      <div class="tiles" id="homeTiles"></div>
+    </section>
+
+    <!-- HISTORIE -->
+    <section class="page" id="p-history">
+      <h2>Historie: od kamenolomu k tepelnému motoru</h2>
+      <div class="years" id="histYears"></div>
+      <div class="track"><i id="histDot"></i></div>
+      <div class="layout">
+        <div class="detail card">
+          <div>
+            <div class="year" id="histYear"></div>
+            <h3 id="histTitle"></h3>
+            <p id="histText"></p>
+          </div>
+          <div class="arrows">
+            <button class="btn" id="histPrev">‹ Předchozí</button>
+            <button class="btn" id="histNext">Další ›</button>
+          </div>
+        </div>
+        <div><img id="histImg" class="ph" alt=""></div>
+      </div>
+    </section>
+
+    <!-- PSALI O NÁS -->
+    <section class="page" id="p-press">
+      <h2>Psali o nás: Technický magazín 2016–2025</h2>
+      <p class="lead">Každý rok k Mezinárodnímu strojírenskému veletrhu. Klepnutím na stránku ji zobrazíte v plné velikosti.</p>
+      <div class="years" id="pressYears"></div>
+      <div class="layout">
+        <div class="card">
+          <div class="src" id="pressSrc"></div>
+          <h3 id="pressTitle"></h3>
+          <ul id="pressPoints"></ul>
+        </div>
+        <div>
+          <div class="photos" id="pressPhotos"></div>
+          <div class="pages" id="pressPages"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CO UMÍME -->
+    <section class="page" id="p-cap">
+      <h2>Co umíme</h2>
+      <div class="nums" id="capNums"></div>
+      <div class="tabs" id="capTabs"></div>
+      <div class="layout">
+        <div class="card"><ul id="capList"></ul></div>
+        <div><img id="capImg" class="ph" alt="" style="height:100%;aspect-ratio:auto;max-height:28rem"></div>
+      </div>
+      <div class="gallery" id="capGallery"></div>
+    </section>
+
+    <!-- ENERGIE -->
+    <section class="page" id="p-energy">
+      <h2>Energie, úspory a dotace EU</h2>
+      <p class="lead" id="energyIntro"></p>
+      <div class="layout">
+        <div class="card">
+          <h3>Vlastní fotovoltaika – instalovaný výkon</h3>
+          <div class="bars" id="pvBars"></div>
+          <div class="gauge">
+            <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="#2e3d4b" stroke-width="3.5"/><circle id="gaugeRing" cx="18" cy="18" r="15.9" fill="none" stroke="#38d39f" stroke-width="3.5" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 18 18)" style="transition:stroke-dasharray 1.2s"/><text x="18" y="21" text-anchor="middle" font-size="8" font-weight="800" fill="#8be8ca" id="gaugeTxt">50 %</text></svg>
+            <div class="txt"><div class="v">Cíl: 50 % vlastní elektřiny</div><div class="muted" id="gaugeSub"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Uhlíková stopa 1 MWh elektřiny</h3>
+          <div class="co2">
+            <div class="box f"><div class="v" id="co2f"></div><div class="muted">kg CO₂ z fosilních paliv</div></div>
+            <div class="box p"><div class="v" id="co2p"></div><div class="muted">kg CO₂ z fotovoltaiky</div></div>
+          </div>
+          <p style="font-size:1.2rem;margin:1rem 0 0;color:#dbe4ec">Fotovoltaika = osmina emisí. Vlastní výrobou snižujeme uhlíkovou stopu firmy již dnes o <b style="color:var(--green2)">cca 20 %</b>, tedy o pětinu ročně.</p>
+          <p style="font-size:1.2rem;margin:.8rem 0 0;color:#dbe4ec">Stavební úpravy hal (OP TAK) uspoří <b style="color:var(--green2)">105 MWh</b> primární energie ročně – cca 15 % spotřeby elektřiny.</p>
+        </div>
+      </div>
+      <div class="grants" id="grants"></div>
+    </section>
+
+    <!-- MOTOR -->
+    <section class="page" id="p-engine">
+      <h2>Tepelný plynový motor – nová energetická jednotka</h2>
+      <p class="lead" id="engineLead"></p>
+      <div class="layout">
+        <div class="imgs" id="engineImgs"></div>
+        <div class="feat" id="engineFeat"></div>
+      </div>
+      <div class="roadmap" id="engineRoad"></div>
+      <div style="display:flex;gap:1rem;margin-top:1.4rem">
+        <button class="btn red big" data-go="steps">Jak to funguje ve 4 krocích ›</button>
+        <button class="btn green big" data-go="calc">Spočítat návratnost ›</button>
+      </div>
+    </section>
+
+    <!-- 4 KROKY -->
+    <section class="page" id="p-steps">
+      <h2>Odpadní teplo → vlastní elektřina ve 4 krocích</h2>
+      <div class="stepnav" id="stepNav"></div>
+
+      <div class="step" id="step1">
+        <div class="split">
+          <div class="bigtext" id="problemText"></div>
+          <div class="chimney" id="chimney">
+            <div class="money"><div class="v" id="moneyCounter">0 Kč</div><div class="l">uniklo komínem od otevření této stránky<br>(1 MW tepla · 3,50 Kč/kWh)</div></div>
+            <svg viewBox="0 0 400 300">
+              <defs><linearGradient id="gHeat" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff8a2a"/><stop offset="1" stop-color="#ffc36b" stop-opacity="0"/></linearGradient></defs>
+              <rect x="40" y="170" width="220" height="110" rx="6" fill="#2a3a48"/>
+              <polygon points="40,170 90,130 140,170 190,130 240,170 260,170 260,178 40,178" fill="#33475a"/>
+              <rect x="60" y="200" width="30" height="30" fill="#0b1218"/><rect x="110" y="200" width="30" height="30" fill="#0b1218"/><rect x="160" y="200" width="30" height="30" fill="#0b1218"/>
+              <rect x="280" y="60" width="34" height="220" rx="3" fill="#3a4a57"/><rect x="276" y="52" width="42" height="14" rx="3" fill="#4a5c6b"/>
+              <g id="heatWaves">
+                <path d="M297 40 c-10 -10 10 -20 0 -30" stroke="url(#gHeat)" stroke-width="6" fill="none" stroke-linecap="round" opacity=".9"><animate attributeName="opacity" values="0;.9;0" dur="2s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 10;0 -40" dur="2s" repeatCount="indefinite"/></path>
+                <path d="M285 40 c-10 -10 10 -20 0 -30" stroke="url(#gHeat)" stroke-width="6" fill="none" stroke-linecap="round"><animate attributeName="opacity" values="0;.9;0" dur="2s" begin=".7s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 10;0 -40" dur="2s" begin=".7s" repeatCount="indefinite"/></path>
+                <path d="M309 40 c-10 -10 10 -20 0 -30" stroke="url(#gHeat)" stroke-width="6" fill="none" stroke-linecap="round"><animate attributeName="opacity" values="0;.9;0" dur="2s" begin="1.3s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" values="0 10;0 -40" dur="2s" begin="1.3s" repeatCount="indefinite"/></path>
+              </g>
+              <text x="150" y="262" text-anchor="middle" fill="#a7b6c2" font-size="14" font-weight="700">VÁŠ PROVOZ</text>
+              <text x="297" y="296" text-anchor="middle" fill="#ffc36b" font-size="13" font-weight="800">≥ 1 MW tepla</text>
+            </svg>
+          </div>
+        </div>
+        <div class="stepbtns"><span></span><button class="btn red" data-step="2">2. Schéma řešení ›</button></div>
+      </div>
+
+      <div class="step" id="step2">
+        <div class="schema">
+          <svg viewBox="0 0 1200 330" id="schemaSvg">
+            <defs>
+              <linearGradient id="gH" x1="0" x2="1"><stop offset="0" stop-color="#ff8a2a"/><stop offset="1" stop-color="#ffc36b"/></linearGradient>
+              <linearGradient id="gE" x1="0" x2="1"><stop offset="0" stop-color="#5ab4ee"/><stop offset="1" stop-color="#8be8ca"/></linearGradient>
+              <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ffc36b"/></marker>
+              <marker id="ae" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8be8ca"/></marker>
+            </defs>
+            <!-- 1 stávající technologie -->
+            <g transform="translate(20,70)">
+              <rect width="200" height="190" rx="16" fill="#212d39" stroke="#2e3d4b"/>
+              <g transform="translate(40,30)"><rect x="0" y="50" width="120" height="70" rx="4" fill="#3a4a57"/><polygon points="0,50 30,28 60,50 90,28 120,50" fill="#4a5c6b"/><rect x="95" y="0" width="16" height="60" fill="#4a5c6b"/><rect x="20" y="75" width="18" height="18" fill="#0b1218"/><rect x="55" y="75" width="18" height="18" fill="#0b1218"/></g>
+              <text x="100" y="165" text-anchor="middle" fill="#f3f6f8" font-size="17" font-weight="800">STÁVAJÍCÍ TECHNOLOGIE</text>
+              <text x="100" y="185" text-anchor="middle" fill="#a7b6c2" font-size="13">pec · sušárna · kogenerace</text>
+            </g>
+            <!-- odpadní teplo -->
+            <path class="flow" d="M222 165 H 300" stroke="url(#gH)" stroke-width="8" fill="none" marker-end="url(#ah)"/>
+            <text x="261" y="126" text-anchor="middle" fill="#ffc36b" font-size="13" font-weight="800">ODPADNÍ</text><text x="261" y="142" text-anchor="middle" fill="#ffc36b" font-size="13" font-weight="800">TEPLO</text>
+            <text x="261" y="196" text-anchor="middle" fill="#a7b6c2" font-size="11">vzduch · spaliny</text><text x="261" y="210" text-anchor="middle" fill="#a7b6c2" font-size="11">voda</text>
+            <!-- 2 výměník -->
+            <g transform="translate(305,70)">
+              <rect width="200" height="190" rx="16" fill="#212d39" stroke="#ff8a2a"/>
+              <g transform="translate(40,35)" stroke="#ff8a2a" stroke-width="7" fill="none" stroke-linecap="round"><path d="M0 20 H120"/><path d="M0 50 H120"/><path d="M0 80 H120"/><path d="M20 0 V100 M50 0 V100 M80 0 V100 M110 0 V100" stroke="#5ab4ee" stroke-width="4" opacity=".8"/></g>
+              <text x="100" y="165" text-anchor="middle" fill="#f3f6f8" font-size="17" font-weight="800">VÝMĚNÍK TEPLA</text>
+              <text x="100" y="185" text-anchor="middle" fill="#a7b6c2" font-size="13">odpadního tepla</text>
+            </g>
+            <path class="flow" d="M507 165 H 585" stroke="url(#gH)" stroke-width="10" fill="none" marker-end="url(#ah)"/>
+            <text x="546" y="140" text-anchor="middle" fill="#ffc36b" font-size="15" font-weight="900">1 000 kW</text>
+            <text x="546" y="200" text-anchor="middle" fill="#a7b6c2" font-size="12">tepla</text>
+            <!-- 3 motor -->
+            <g transform="translate(590,55)">
+              <rect width="220" height="220" rx="16" fill="#2a1a12" stroke="#ff8a2a" stroke-width="2"/>
+              <g transform="translate(110,95)"><circle r="55" fill="#3a2418" stroke="#ff8a2a" stroke-width="5"/><g id="rotor"><path d="M-40 0 H40 M0 -40 V40 M-28 -28 L28 28 M-28 28 L28 -28" stroke="#ffc36b" stroke-width="8" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="4s" repeatCount="indefinite"/></path></g><circle r="14" fill="#ff8a2a"/></g>
+              <text x="110" y="185" text-anchor="middle" fill="#f3f6f8" font-size="17" font-weight="800">UZAVŘENÝ TEPELNÝ</text>
+              <text x="110" y="205" text-anchor="middle" fill="#f3f6f8" font-size="17" font-weight="800">PLYNOVÝ MOTOR</text>
+            </g>
+            <path class="flow" d="M812 165 H 880" stroke="#ffc36b" stroke-width="6" fill="none" marker-end="url(#ah)"/>
+            <text x="846" y="140" text-anchor="middle" fill="#ffc36b" font-size="14" font-weight="900">100 kW</text>
+            <text x="846" y="200" text-anchor="middle" fill="#a7b6c2" font-size="12">mechanicky</text>
+            <!-- 4 generátor -->
+            <g transform="translate(885,90)">
+              <rect width="150" height="150" rx="16" fill="#212d39" stroke="#5ab4ee"/>
+              <g transform="translate(75,60)"><circle r="34" fill="#0b1218" stroke="#5ab4ee" stroke-width="5"/><path d="M8 -22 L-8 2 H4 L-6 22 L10 -2 H-2 Z" fill="#8be8ca"/></g>
+              <text x="75" y="125" text-anchor="middle" fill="#f3f6f8" font-size="16" font-weight="800">GENERÁTOR</text>
+            </g>
+            <path class="flow" d="M1037 165 H 1100" stroke="url(#gE)" stroke-width="8" fill="none" marker-end="url(#ae)"/>
+            <text x="1068" y="140" text-anchor="middle" fill="#8be8ca" font-size="15" font-weight="900">100 kWe</text>
+            <!-- 5 síť -->
+            <g transform="translate(1105,90)">
+              <rect width="90" height="150" rx="16" fill="#0f2a22" stroke="#38d39f"/>
+              <g transform="translate(45,55)" stroke="#8be8ca" stroke-width="5" fill="none" stroke-linecap="round"><path d="M-22 30 L0 -30 L22 30 M-14 8 H14"/><path d="M-30 30 H30"/></g>
+              <text x="45" y="120" text-anchor="middle" fill="#8be8ca" font-size="12" font-weight="800">VNITRO-</text>
+              <text x="45" y="135" text-anchor="middle" fill="#8be8ca" font-size="12" font-weight="800">PODNIKOVÁ SÍŤ</text>
+            </g>
+            <text x="600" y="315" text-anchor="middle" fill="#a7b6c2" font-size="14">Z každého 1 MW odpadního tepla vám vrátíme přibližně 100 kW elektrického výkonu – spotřebovaného přímo ve vašem závodě.</text>
+          </svg>
+        </div>
+        <div class="nofuel" id="nofuel"></div>
+        <div class="stepbtns"><button class="btn" data-step="1">‹ 1. Problém</button><button class="btn red" data-step="3">3. Ekonomika ›</button></div>
+      </div>
+
+      <div class="step" id="step3">
+        <div class="assump" id="assump"></div>
+        <div class="formula" id="formula"></div>
+        <div class="closing" id="econNote" style="margin-top:0"></div>
+        <div class="stepbtns"><button class="btn" data-step="2">‹ 2. Schéma</button><button class="btn red" data-step="4">4. Návratnost ›</button></div>
+      </div>
+
+      <div class="step" id="step4">
+        <p class="lead" style="margin-bottom:1rem">Návratnost investice v různých typech podniků (výkon 100 kW, investice 6 mil. Kč, 3,50 Kč/kWh, servis 200 000 Kč/rok). Klepnutím otevřete případ v kalkulačce.</p>
+        <div class="cases" id="cases"></div>
+        <div class="closing" id="closingText"></div>
+        <div class="stepbtns"><button class="btn" data-step="3">‹ 3. Ekonomika</button><button class="btn green big" data-go="calc">Spočítat pro váš provoz ›</button></div>
+      </div>
+    </section>
+
+    <!-- KALKULAČKA -->
+    <section class="page" id="p-calc">
+      <h2>Kolik vám může vydělat odpadní teplo?</h2>
+      <p class="lead" style="margin-bottom:.9rem;font-size:1.2rem">Dotyková kalkulačka výkonu, úspory a návratnosti tepelného plynového motoru. Klepnutím na hodnotu ji zadáte z klávesnice.</p>
+      <div class="layout">
+        <div>
+          <div class="tabs"><button class="on" data-ctab="quick">Rychlá kalkulace</button><button data-ctab="tech">Technická kalkulace z proudu média</button></div>
+          <div id="quickPane">
+            <div class="field"><label>Typ zdroje odpadního tepla</label><div class="choices" id="srcChoices"></div></div>
+            <div class="grid2" style="gap:.8rem">
+              <div class="field" data-f="heat"><label>Dostupný tepelný výkon</label><div class="row"><button class="step" data-d="-1">−</button><div class="val" data-open="heat"><span class="n"></span><small>MW</small></div><button class="step" data-d="1">+</button></div><div class="presets" data-p="0.5,1,2,5"></div></div>
+              <div class="field" data-f="unused"><label>Skutečně nevyužitá část tepla</label><div class="row"><button class="step" data-d="-1">−</button><div class="val" data-open="unused"><span class="n"></span><small>%</small></div><button class="step" data-d="1">+</button></div><div class="presets" data-p="50,75,100"></div></div>
+              <div class="field" data-f="hours"><label>Dostupnost tepla</label><div class="row"><button class="step" data-d="-1">−</button><div class="val" data-open="hours"><span class="n"></span><small>h/rok</small></div><button class="step" data-d="1">+</button></div><div class="presets" data-p="4000,6000,7500,8000"></div></div>
+              <div class="field" data-f="price"><label>Hodnota vlastní elektřiny</label><div class="row"><button class="step" data-d="-1">−</button><div class="val" data-open="price"><span class="n"></span><small>Kč/kWh</small></div><button class="step" data-d="1">+</button></div><div class="presets" data-p="3,3.5,4"></div></div>
+            </div>
+            <div class="demos" id="demos"></div>
+          </div>
+          <div id="techPane" class="hidden">
+            <p class="muted" style="margin:0 0 .8rem;font-size:1.05rem">Orientační výpočet tepelného výkonu z průtoku a rozdílu teplot. U spalin a vlhkého vzduchu je nutné výsledky ověřit měřením.</p>
+            <div class="field"><label>Médium</label><div class="choices" id="mediumChoices" style="grid-template-columns:1fr 1fr"></div></div>
+            <div class="grid2" style="gap:.8rem">
+              <div class="field" data-f="flow"><label>Objemový průtok</label><div class="row"><button class="step" data-d="-1">−</button><div class="val" data-open="flow"><span class="n"></span><small>m³/h</small></div><button class="step" data-d="1">+</button></div></div>
+              <div class="field" data-f="tin"><label>Vstupní teplota</label><div class="row"><button class="step" data-d="-1">−</button><div class="val" data-open="tin"><span class="n"></span><small>°C</small></div><button class="step" data-d="1">+</button></div></div>
+              <div class="field" data-f="tout"><label>Výstupní teplota</label><div class="row"><button class="step" data-d="-1">−</button><div class="val" data-open="tout"><span class="n"></span><small>°C</small></div><button class="step" data-d="1">+</button></div></div>
+              <div class="field" data-f="techHours"><label>Dostupnost</label><div class="row"><button class="step" data-d="-1">−</button><div class="val" data-open="techHours"><span class="n"></span><small>h/rok</small></div><button class="step" data-d="1">+</button></div></div>
+              <div class="field" data-f="density"><label>Hustota média</label><div class="row"><button class="step" data-d="-1">−</button><div class="val" data-open="density"><span class="n"></span><small>kg/m³</small></div><button class="step" data-d="1">+</button></div></div>
+              <div class="field" data-f="cp"><label>Měrná tepelná kapacita</label><div class="row"><button class="step" data-d="-1">−</button><div class="val" data-open="cp"><span class="n"></span><small>kJ/kgK</small></div><button class="step" data-d="1">+</button></div></div>
+              <div class="field" data-f="techPrice"><label>Hodnota vlastní elektřiny</label><div class="row"><button class="step" data-d="-1">−</button><div class="val" data-open="techPrice"><span class="n"></span><small>Kč/kWh</small></div><button class="step" data-d="1">+</button></div></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="results">
+            <div class="metric big"><div class="k">Odhadovaná prostá návratnost</div><div class="v" id="rPayback">—</div><div class="s">při zadaných parametrech, bez financování a dotace</div></div>
+            <div class="metric"><div class="k">Elektrický výkon</div><div class="v" id="rPower">—</div><div class="s" id="rConfig"></div></div>
+            <div class="metric"><div class="k">Roční výroba elektřiny</div><div class="v" id="rEnergy">—</div><div class="s">při zadané dostupnosti tepla</div></div>
+            <div class="metric"><div class="k">Hodnota elektřiny</div><div class="v" id="rGross">—</div><div class="s">ročně</div></div>
+            <div class="metric"><div class="k">Čistý roční přínos</div><div class="v" id="rNet">—</div><div class="s">po odečtení servisu</div></div>
+            <div class="metric"><div class="k">Investice</div><div class="v" id="rCapex">—</div><div class="s">orientační cena technologie</div></div>
+            <div class="metric"><div class="k">Každou hodinu</div><div class="v" id="rHourly">—</div><div class="s">hodnota vyráběné elektřiny</div></div>
+          </div>
+          <canvas id="chart"></canvas>
+          <div class="interp" id="interp"></div>
+          <div class="disclaimer">Orientační kalkulace pro prvotní posouzení. Skutečný výkon a ekonomika závisejí na teplotní úrovni, průtoku, složení média, dostupnosti tepla, tlakových ztrátách, chlazení, vlastní spotřebě zařízení a konkrétní nabídce technologie. Pro technické posouzení se zastavte u našeho stánku.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KONTAKT -->
+    <section class="page" id="p-contact">
+      <h2>Přijďte na náš stánek, pomůžeme vám s realizací vašeho projektu</h2>
+      <div class="layout">
+        <div class="card">
+          <div class="big">STROJÍRNY OLŠOVEC s.r.o.</div>
+          <div class="muted" style="font-size:1.2rem;margin-top:.3rem">Ryze česká rodinná firma · zakázková strojírenská výroba od roku 1993</div>
+          <div class="row"><span class="ic">📍</span><span id="cAddress"></span></div>
+          <div class="row"><span class="ic">🌐</span><b id="cWeb"></b></div>
+          <div class="row"><span class="ic">📞</span><span id="cPhone"></span></div>
+          <div class="row"><span class="ic">✉️</span><span id="cEmail"></span></div>
+          <div class="row"><span class="ic">👤</span><span id="cDirector"></span></div>
+          <div style="display:flex;gap:.8rem;margin-top:1rem;flex-wrap:wrap"><span class="pill heat" id="cFair"></span><span class="pill blue" id="cStand"></span></div>
+        </div>
+        <div class="map">
+          <img src="assets/img/2016-areal.jpg" alt="Areál Strojíren Olšovec">
+          <div class="cap">Areál firmy v Olšovci u Hranic – obchodní jednání probíhají v prostředí historického statku s vlastním sklípkem.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav id="nav"></nav>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" class="hidden"><img id="lbImg" alt=""><div class="cap" id="lbCap"></div><button class="arr l" id="lbPrev">‹</button><button class="arr r" id="lbNext">›</button><button class="x" id="lbClose">×</button></div>
+
+<!-- Numerická klávesnice -->
+<div id="numpad" class="hidden"><div class="pad"><div class="lbl" id="npLabel"></div><div class="disp"><span id="npDisp">0</span><small id="npUnit"></small></div><div class="keys" id="npKeys"></div></div></div>
+
+<!-- Admin (dlouhý stisk loga) -->
+<div id="admin" class="hidden"><div class="box">
+  <h3>Servisní nastavení</h3>
+  <div class="g" id="adminFields"></div>
+  <p class="muted" style="font-size:1rem">Nastavení se ukládá do tohoto prohlížeče (localStorage). Tlačítko „Výchozí“ vrátí hodnoty z data.js.</p>
+  <div class="foot"><button class="btn ghost" id="adminReset">Výchozí</button><button class="btn ghost" id="adminFs">Celá obrazovka</button><button class="btn green" id="adminClose">Uložit a zavřít</button></div>
+</div></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
