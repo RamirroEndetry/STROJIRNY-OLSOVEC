@@ -12,11 +12,42 @@ const mil = n => cz(n / 1e6, 2) + " mil. Kč";
 const filled = s => s && !/DOPLNIT/.test(s);   // placeholdery se na obrazovce nezobrazují
 
 /* ---------- nastavení (data.js + localStorage) ---------- */
-const SETTINGS_KEY = "so-msv-settings-v2";
-const DEFAULTS = { slideSeconds: CONFIG.slideSeconds, calcIdleSeconds: CONFIG.calcIdleSeconds, eff: CALC_DEFAULTS.eff, modulePower: CALC_DEFAULTS.modulePower, moduleCapex: CALC_DEFAULTS.moduleCapex, moduleOpex: CALC_DEFAULTS.moduleOpex };
+const SETTINGS_KEY = "so-msv-settings-v3";
+const DEFAULTS = { slideSeconds: CONFIG.slideSeconds, readingWpm: CONFIG.readingWpm, calcIdleSeconds: CONFIG.calcIdleSeconds, musicVolume: AUDIO.musicVolume, voiceVolume: AUDIO.voiceVolume, eff: CALC_DEFAULTS.eff, modulePower: CALC_DEFAULTS.modulePower, moduleCapex: CALC_DEFAULTS.moduleCapex, moduleOpex: CALC_DEFAULTS.moduleOpex };
 const settings = Object.assign({}, DEFAULTS);
 try { Object.assign(settings, JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}")); } catch (e) {}
 const saveSettings = () => { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {} };
+document.documentElement.style.setProperty("--fade", CONFIG.fadeSeconds + "s");
+document.documentElement.style.setProperty("--pfade", CONFIG.photoFadeSeconds + "s");
+
+const READY_ARTICLES = ARTICLES.filter(a => a.ready !== false);
+const PLAY = SEQUENCE.filter(s => (s.type !== "story" || STORY.enabled) && (s.type !== "article" || READY_ARTICLES.some(a => a.y === s.y)));
+
+/* Střídání fotografií uvnitř snímku: nová fotka se plynule prolne přes starou,
+   stará zůstane pod ní (i s pohybem) až do konce prolnutí → žádné poskočení ani probliknutí.
+   times = pole okamžiků [ms] pro každou fotku, nebo jedno číslo = interval. */
+function cycler(node, sel, times, onChange) {
+  const items = [...node.querySelectorAll(sel)], fade = CONFIG.photoFadeSeconds * 1000, timers = [];
+  if (!items.length) return () => {};
+  const at = Array.isArray(times) ? times : items.map((_, i) => i * times);
+  const every = Array.isArray(times) ? 0 : times;
+  items.forEach((p, i) => { clearTimeout(p._t); p.classList.remove("out"); p.classList.toggle("on", i === 0); });
+  items.forEach((p, i) => { const next = i + 1 < at.length ? at[i + 1] : at[i] + (every || 8000); p.style.setProperty("--kbdur", ((next - at[i] + fade) / 1000 + 1) + "s"); });
+  onChange?.(0);
+  let k = 0;
+  const swap = n => {
+    const old = items[k], nw = items[n]; if (old === nw) return;
+    old.classList.add("out"); old.classList.remove("on");
+    clearTimeout(old._t); old._t = setTimeout(() => old.classList.remove("out"), fade + 100);
+    clearTimeout(nw._t); nw.classList.remove("out"); void nw.offsetWidth; nw.classList.add("on");
+    k = n; onChange?.(n);
+  };
+  if (items.length > 1) {
+    if (every) timers.push(setInterval(() => swap((k + 1) % items.length), every));
+    else at.slice(1).forEach((t, i) => timers.push(setTimeout(() => swap(i + 1), t)));
+  }
+  return () => timers.forEach(t => { clearInterval(t); clearTimeout(t); });
+}
 
 /* =====================================================================
    ŠABLONY SNÍMKŮ – každá vrací { html, enter?, leave? }
@@ -48,12 +79,68 @@ const TEMPLATES = {
       </div>
     </div>` }),
 
+  story: () => {
+    let stop = null;
+    return {
+      html: `
+      <div class="photos full">${STORY.scenes.map(sc => `<div class="ph" style="background-image:url('${sc.img}')">${sc.text ? `<div class="cap">${sc.text}</div>` : ""}</div>`).join("")}</div>
+      <div class="shade"></div>
+      <div class="hero-in story-in">
+        <div class="kicker a" ${d(.3)}>${STORY.kicker}</div>
+        <h1 class="a" ${d(.6)}>${STORY.title}</h1>
+        <div class="voice a" ${d(1.2)}><span class="eq"><i></i><i></i><i></i><i></i></span>Poslechněte si náš příběh</div>
+      </div>`,
+      enter(node, sec) {
+        const n = STORY.scenes.length;
+        const times = STORY.scenes.every((sc, i) => i === 0 || sc.at != null) ? STORY.scenes.map(sc => (sc.at || 0) * 1000) : sec * 1000 / n;
+        stop = cycler(node, ".photos .ph", times);
+        voiceStart();
+      },
+      leave() { stop?.(); voiceStop(); },
+    };
+  },
+
+  msv: () => {
+    let stop = null;
+    return {
+      html: `
+      <div class="body split">
+        <div class="txt">
+          <div class="kicker a" ${d(0)}>${MSV.kicker}</div>
+          <h2 class="a" ${d(.2)}>${MSV.title}</h2>
+          <p class="lead a" ${d(.5)}>${MSV.lead}</p>
+          <div class="msv-list">${MSV.photos.map((p, i) => `<div class="yi a" data-i="${i}" ${d(1 + i * .3)}><b>${p.y}</b><span>${p.t}</span></div>`).join("")}
+            <div class="yi now a" ${d(1 + MSV.photos.length * .3)}><b>${CONFIG.fairName.match(/\d{4}/)?.[0] || ""}</b><span>Těšíme se na vás – ${CONFIG.stand}</span></div></div>
+        </div>
+        <div class="vis a" ${d(.3)}>
+          <div class="photos prints">${MSV.photos.map(p => `<div class="ph print"><img src="${p.img}" alt=""></div>`).join("")}</div>
+        </div>
+      </div>`,
+      enter(node, sec) {
+        const items = node.querySelectorAll(".msv-list .yi[data-i]");
+        stop = cycler(node, ".photos .ph", sec * 1000 / MSV.photos.length, k => items.forEach((e, i) => e.classList.toggle("cur", i === k)));
+      },
+      leave() { stop?.(); },
+    };
+  },
+
+  certs: () => ({ html: `
+    <div class="body">
+      <div class="kicker a" ${d(0)}>${CERTS.kicker}</div>
+      <h2 class="a" ${d(.2)}>${CERTS.title}</h2>
+      <p class="lead a" ${d(.4)}>${CERTS.lead}</p>
+      <div class="certs">${CERTS.items.map((c, i) => `<div class="cert a" ${d(.9 + i * .6)}>
+        <div class="doc"><img src="${c.img}" alt="${c.norm}"><i class="shine" style="--d2:${2.4 + i * .6}s"></i></div>
+        <div class="info"><div class="norm">${c.norm}</div><b>${c.t}</b><p>${c.d}</p><span class="pill green">✔ ${c.since}</span></div>
+      </div>`).join("")}</div>
+    </div>` }),
+
   pressIntro: () => ({ html: `
     <div class="body center">
       <div class="kicker a" ${d(0)}>${PRESS_INTRO.kicker}</div>
-      <h1 class="a" ${d(.2)}>${PRESS_INTRO.title}</h1>
+      <h1 class="a" ${d(.2)}>${PRESS_INTRO.title} ${READY_ARTICLES[0].y}–${READY_ARTICLES[READY_ARTICLES.length - 1].y}</h1>
       <div class="sub a" ${d(.4)}>${PRESS_INTRO.sub}</div>
-      <div class="fan">${ARTICLES.map((a, i) => { const n = ARTICLES.length, r = (i - (n - 1) / 2) * 5; return `<div class="pg a" style="--d:${.6 + i * .18}s;--r:${r}deg;--y:${Math.abs(r) * .25}rem"><img src="${a.pages[0]}" alt=""><b>${a.y}</b></div>`; }).join("")}</div>
+      <div class="fan">${READY_ARTICLES.map((a, i) => { const n = READY_ARTICLES.length, r = (i - (n - 1) / 2) * 5; return `<div class="pg a" style="--d:${.6 + i * .18}s;--r:${r}deg;--y:${Math.abs(r) * .25}rem"><img src="${a.pages[0]}" alt=""><b>${a.y}</b></div>`; }).join("")}</div>
     </div>` }),
 
   article: s => {
@@ -69,17 +156,12 @@ const TEMPLATES = {
           <ul>${a.points.map((p, i) => `<li class="a" ${d(1 + i * .7)}>${p}</li>`).join("")}</ul>
         </div>
         <div class="vis a" ${d(.2)}>
-          <div class="photos">${a.photos.map((p, i) => `<div class="ph${i === 0 ? " on" : ""}" style="background-image:url('${p}')"></div>`).join("")}</div>
+          <div class="photos">${a.photos.map(p => `<div class="ph" style="background-image:url('${p}')"></div>`).join("")}</div>
           <div class="mag a" ${d(1.2)}><img src="${a.pages[0]}" alt=""><span>${a.src}</span></div>
         </div>
       </div>`,
-      enter(node, sec) {
-        const phs = node.querySelectorAll(".ph"); let k = 0;
-        phs.forEach((p, i) => p.classList.toggle("on", i === 0));
-        const every = sec * 1000 / phs.length;
-        t = setInterval(() => { phs[k].classList.remove("on"); k = (k + 1) % phs.length; phs[k].classList.add("on"); }, every);
-      },
-      leave() { clearInterval(t); },
+      enter(node, sec) { t = cycler(node, ".photos .ph", sec * 1000 / a.photos.length); },
+      leave() { t?.(); },
     };
   },
 
@@ -198,33 +280,51 @@ const TEMPLATES = {
    PŘEHRÁVAČ
    ===================================================================== */
 const show = { i: -1, timer: null, paused: false, slides: [] };
-const CHAPTERS = [...new Set(SEQUENCE.map(s => s.chapter))];
-const secOf = s => Math.max(3, settings.slideSeconds * (s.k || 1));
+const CHAPTERS = [...new Set(PLAY.map(s => s.chapter))];
+/* Délka snímku = delší z: minimální délka (slideSeconds × k) a doba potřebná na přečtení
+   celého textu (počet slov / readingWpm, nejdříve ale až se objeví poslední prvek). */
+function readSeconds(node) {
+  const words = node.textContent.split(/\s+/).filter(w => /[\p{L}\d]/u.test(w)).length;
+  const last = Math.max(0, ...[...node.querySelectorAll(".a")].map(e => parseFloat(e.style.getPropertyValue("--d")) || 0));
+  return Math.max(last + 4, words / (settings.readingWpm / 60) + 3);
+}
+const secOf = sl => sl.spec.type === "story" ? (STORY._dur || STORY.fallbackSeconds) + 1.5
+  : Math.max(3, settings.slideSeconds * (sl.spec.k || 1), sl.read);
 
 function buildShow() {
   $("topFair").textContent = CONFIG.fairName;
   $("topFairSub").textContent = CONFIG.fairDates + " · " + CONFIG.stand;
-  SEQUENCE.forEach(s => {
+  PLAY.forEach(s => {
     const t = TEMPLATES[s.type](s);
     const node = el("div", "s s-" + s.type, t.html);
     $("slides").appendChild(node);
-    show.slides.push({ node, spec: s, t });
+    show.slides.push({ node, spec: s, t, read: readSeconds(node) });
   });
   CHAPTERS.forEach(c => {
-    const n = SEQUENCE.filter(s => s.chapter === c).length;
+    const n = PLAY.filter(s => s.chapter === c).length;
     const seg = el("div", "seg", `<div class="fill"><i></i></div><span>${c}</span>`);
     seg.style.flex = String(n + 2);
     $("chapters").appendChild(seg);
   });
 }
 
+/* Přechod: nový snímek se plynule prolne přes starý; starý zůstane pod ním beze změny
+   (i se svými animacemi), dokud prolnutí neskončí. */
 function goSlide(n) {
   const len = show.slides.length;
   const prev = show.slides[show.i];
-  if (prev) { prev.node.classList.remove("on"); prev.t.leave?.(prev.node); }
   show.i = (n + len) % len;
-  const cur = show.slides[show.i], sec = secOf(cur.spec);
-  cur.node.classList.remove("on"); void cur.node.offsetWidth; cur.node.classList.add("on");   // restart animací
+  const cur = show.slides[show.i], sec = secOf(cur);
+  if (prev && prev !== cur) {
+    prev.t.leave?.(prev.node);
+    prev.node.classList.add("out");
+    clearTimeout(prev.node._outT);
+    prev.node._outT = setTimeout(() => prev.node.classList.remove("on", "out"), CONFIG.fadeSeconds * 1000 + 150);
+  }
+  clearTimeout(cur.node._outT);
+  cur.node.classList.remove("on", "out"); void cur.node.offsetWidth;
+  cur.node.style.setProperty("--kbdur", (sec + CONFIG.fadeSeconds + 2) + "s");
+  cur.node.classList.add("on");   // restart animací
   cur.node.querySelectorAll("[data-count]").forEach(nd => {
     const host = nd.closest(".a"), delay = host ? parseFloat(getComputedStyle(host).getPropertyValue("--d")) || 0 : 0;
     nd.textContent = (nd.dataset.prefix || "") + "0" + (nd.dataset.suffix || "");
@@ -239,8 +339,8 @@ function goSlide(n) {
 
 function updateChapters(spec, sec) {
   const ci = CHAPTERS.indexOf(spec.chapter);
-  const inCh = SEQUENCE.filter(s => s.chapter === spec.chapter);
-  const pos = SEQUENCE.slice(0, show.i + 1).filter(s => s.chapter === spec.chapter).length - 1;
+  const inCh = PLAY.filter(s => s.chapter === spec.chapter);
+  const pos = PLAY.slice(0, show.i + 1).filter(s => s.chapter === spec.chapter).length - 1;
   [...$("chapters").children].forEach((seg, k) => {
     const f = seg.querySelector("i");
     seg.classList.toggle("on", k === ci);
@@ -293,6 +393,52 @@ window.addEventListener("resize", () => { const cur = show.slides[show.i]; if (c
 
 function pauseShow() { show.paused = true; clearTimeout(show.timer); const cur = show.slides[show.i]; cur?.t.leave?.(cur.node); }
 function resumeShow() { show.paused = false; goSlide(show.i + 1); }
+
+/* =====================================================================
+   ZVUK – hudební podkres ve smyčce + mluvené slovo (hudba se při něm ztiší)
+   Prohlížeč smí přehrát zvuk bez dotyku jen v kiosk režimu s povoleným
+   autoplay (viz .bat); jinak se zvuk spustí při prvním dotyku obrazovky.
+   ===================================================================== */
+const snd = { music: new Audio(), voice: new Audio(), list: (AUDIO.music || []).slice(), i: 0, duck: false, voiceOn: false, vol: 0 };
+function musicWanted() { return snd.list.length > 0 && settings.musicVolume > 0; }
+function loadTrack() {
+  if (!snd.list.length) { snd.music.pause(); return; }
+  snd.music.src = snd.list[snd.i]; snd.music.loop = snd.list.length === 1;
+  playMusic();
+}
+function playMusic() { if (musicWanted()) snd.music.play().catch(() => {}); else snd.music.pause(); }
+// pojistka: pokud se hudba nespustila (zvuk po startu PC ještě nebyl připraven), zkoušet to znovu
+setInterval(() => { if (snd.music.paused && musicWanted() && snd.music.src) playMusic(); }, 3000);
+snd.music.addEventListener("playing", () => document.body.dataset.hudba = "hraje");
+snd.music.addEventListener("pause", () => document.body.dataset.hudba = "stoji");
+snd.music.addEventListener("ended", () => { snd.i = (snd.i + 1) % snd.list.length; loadTrack(); });
+snd.music.addEventListener("error", () => {   // chybějící / poškozený soubor přeskočit
+  console.warn("Hudba nenalezena:", snd.list[snd.i]);
+  snd.list.splice(snd.i, 1); if (snd.i >= snd.list.length) snd.i = 0; loadTrack();
+});
+// plynulé změny hlasitosti (ztlumení při mluveném slově, náběh na začátku)
+setInterval(() => {
+  const target = settings.musicVolume / 100 * (snd.duck ? AUDIO.duckTo / 100 : 1);
+  snd.vol += Math.max(-0.02, Math.min(0.02, target - snd.vol));
+  snd.music.volume = Math.max(0, Math.min(1, snd.vol));
+}, 50);
+if (STORY.enabled) {
+  snd.voice.preload = "auto"; snd.voice.src = STORY.audio;
+  snd.voice.addEventListener("loadedmetadata", () => { if (isFinite(snd.voice.duration)) STORY._dur = snd.voice.duration; });
+  snd.voice.addEventListener("error", () => console.warn("Mluvené slovo nenalezeno:", STORY.audio));
+}
+function voiceStart() {
+  if (!STORY.enabled) return;
+  snd.voiceOn = true; snd.duck = true;
+  snd.voice.volume = Math.min(1, settings.voiceVolume / 100);
+  try { snd.voice.currentTime = 0; } catch (e) {}
+  setTimeout(() => { if (snd.voiceOn) snd.voice.play().catch(() => {}); }, 1200);   // hudba se mezitím ztiší
+}
+function voiceStop() { snd.voiceOn = false; snd.duck = false; snd.voice.pause(); }
+// odemknutí zvuku prvním dotykem, pokud prohlížeč blokuje automatické přehrávání
+["pointerdown", "keydown", "touchstart"].forEach(ev => document.addEventListener(ev, () => {
+  if (snd.music.paused && musicWanted()) playMusic();
+}, { passive: true }));
 
 /* =====================================================================
    DOTYK → KALKULAČKA, nečinnost → zpět do prezentace
@@ -417,10 +563,13 @@ function npKey(k) {
 /* =====================================================================
    SERVIS – v kalkulačce podržet logo 3 s
    ===================================================================== */
-const ADMIN_FIELDS = [["slideSeconds", "Základní délka snímku", "s"], ["calcIdleSeconds", "Zavření kalkulačky po nečinnosti", "s"], ["eff", "Čistá elektrická účinnost", "%"], ["modulePower", "Jmenovitý výkon modulu", "kWe"], ["moduleCapex", "Cena 1 modulu", "Kč"], ["moduleOpex", "Roční servis 1 modulu", "Kč/rok"]];
+const ADMIN_FIELDS = [["slideSeconds", "Minimální délka snímku", "s"], ["readingWpm", "Rychlost čtení (delší text = delší snímek)", "slov/min"], ["musicVolume", "Hlasitost hudby (0 = vypnuto)", "%"], ["voiceVolume", "Hlasitost mluveného slova", "%"], ["calcIdleSeconds", "Zavření kalkulačky po nečinnosti", "s"], ["eff", "Čistá elektrická účinnost", "%"], ["modulePower", "Jmenovitý výkon modulu", "kWe"], ["moduleCapex", "Cena 1 modulu", "Kč"], ["moduleOpex", "Roční servis 1 modulu", "Kč/rok"]];
 function buildAdmin() {
   buildAdminFields();
-  $("adminClose").addEventListener("click", () => { saveSettings(); $("admin").classList.add("hidden"); calc(); });
+  $("adminClose").addEventListener("click", () => {
+    settings.readingWpm = Math.max(40, settings.readingWpm); saveSettings(); $("admin").classList.add("hidden"); calc();
+    show.slides.forEach(sl => sl.read = readSeconds(sl.node)); playMusic();
+  });
   $("adminReset").addEventListener("click", () => { Object.assign(settings, DEFAULTS); saveSettings(); buildAdminFields(); });
   $("adminFs").addEventListener("click", () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); });
   let pressT = null;
@@ -444,7 +593,7 @@ document.addEventListener("keydown", e => {
 });
 document.addEventListener("contextmenu", e => e.preventDefault());
 
-buildShow(); buildCalc(); buildNumpad(); buildAdmin();
-window.prezentace = { go: n => goSlide(n), pause: pauseShow, resume: resumeShow };   // pro servis z konzole
+buildShow(); buildCalc(); buildNumpad(); buildAdmin(); loadTrack();
+window.prezentace = { go: n => goSlide(n), pause: pauseShow, resume: resumeShow, casy: () => show.slides.map(sl => sl.spec.type + (sl.spec.y || "") + ": " + Math.round(secOf(sl)) + " s") };   // pro servis z konzole
 goSlide(0);
 })();

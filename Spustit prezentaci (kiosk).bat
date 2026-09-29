@@ -3,10 +3,12 @@ rem Spusti prezentaci v kiosk rezimu (cela obrazovka, bez list prohlizece). Ukon
 set "APP=%~dp0index.html"
 set "EDGE=%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"
 set "CHROME=%ProgramFiles%\Google\Chrome\Application\chrome.exe"
+rem Vlastni profil prohlizece: nastaveni (hudba hned po spusteni) plati i kdyz uz Edge/Chrome bezi
+set "PROFIL=%LOCALAPPDATA%\StrojirnyOlsovec-kiosk"
 if exist "%EDGE%" (
-  start "" "%EDGE%" --kiosk "file:///%APP%" --edge-kiosk-type=fullscreen --no-first-run --disable-pinch --overscroll-history-navigation=0
+  start "" "%EDGE%" --kiosk "file:///%APP%" --edge-kiosk-type=fullscreen --no-first-run --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required --user-data-dir="%PROFIL%" --no-default-browser-check
 ) else if exist "%CHROME%" (
-  start "" "%CHROME%" --kiosk "file:///%APP%" --no-first-run --disable-pinch --overscroll-history-navigation=0
+  start "" "%CHROME%" --kiosk "file:///%APP%" --no-first-run --disable-pinch --overscroll-history-navigation=0 --autoplay-policy=no-user-gesture-required --user-data-dir="%PROFIL%" --no-default-browser-check
 ) else (
   start "" "%APP%"
 )

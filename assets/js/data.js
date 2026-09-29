@@ -8,7 +8,11 @@
    ===================================================================== */
 
 const CONFIG = {
-  slideSeconds: 12,          // základní délka snímku prezentace
+  slideSeconds: 16,          // minimální délka snímku prezentace (× k v SEQUENCE)
+  readingWpm: 140,           // rychlost čtení (slov/min) – snímek s delším textem se automaticky prodlouží,
+                             // aby návštěvník stihl dočíst celý text
+  fadeSeconds: 1.8,          // plynulé prolnutí snímků
+  photoFadeSeconds: 2.4,     // plynulé prolnutí fotografií uvnitř snímku
   calcIdleSeconds: 90,       // po kolika sekundách nečinnosti se kalkulačka zavře a prezentace pokračuje
   fairName: "MSV Brno 2026",
   fairDates: "6.–9. 10. 2026",
@@ -20,12 +24,27 @@ const CONFIG = {
   director: "Ing. Pavel Stupárek, jednatel",
 };
 
+/* ---------- HUDBA A MLUVENÉ SLOVO ----------
+   Hudební podkres hraje stále dokola (skladby v pořadí, pak znovu od první).
+   Soubory MP3 vložte do složky assets/audio. Chybějící soubor se tiše přeskočí.
+   Při mluveném slově se hudba automaticky ztiší.                            */
+const AUDIO = {
+  music: ["assets/audio/hudba-1.mp3", "assets/audio/hudba-2.mp3"],
+  musicVolume: 35,   // hlasitost hudby v % (0 = vypnuto); lze změnit i v servisním panelu
+  voiceVolume: 100,  // hlasitost mluveného slova v %
+  duckTo: 25,        // při mluveném slově hraje hudba jen na x % své hlasitosti
+};
+
 /* ---------- POŘADÍ SNÍMKŮ ----------
    type  = šablona snímku (viz app.js), chapter = kapitola na spodní liště,
-   k     = násobek základní délky snímku (1 = slideSeconds)               */
+   k     = násobek minimální délky snímku (1 = slideSeconds)
+   Snímky s delším textem se prodlouží automaticky (readingWpm).            */
 const SEQUENCE = [
   { type: "intro",    chapter: "Úvod", k: 0.9 },
+  { type: "story",    chapter: "Historie" },          // mluvené slovo + fotografie (zapne se v STORY.enabled)
   { type: "history",  chapter: "Historie", k: 1.3 },
+  { type: "msv",      chapter: "MSV Brno", k: 1.6 },
+  { type: "certs",    chapter: "Certifikáty", k: 1.4 },
   { type: "pressIntro", chapter: "Psali o nás", k: 0.7 },
   { type: "article", y: 2016, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2017, chapter: "Psali o nás", k: 1.25 },
@@ -35,6 +54,7 @@ const SEQUENCE = [
   { type: "article", y: 2023, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2024, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2025, chapter: "Psali o nás", k: 1.25 },
+  { type: "article", y: 2026, chapter: "Psali o nás", k: 1.25 },   // zobrazí se, až bude článek ready: true
   { type: "energy",   chapter: "Energie a dotace", k: 1.3 },
   { type: "grants",   chapter: "Energie a dotace", k: 1.3 },
   { type: "engine",   chapter: "Tepelný motor", k: 1.3 },
@@ -77,10 +97,60 @@ const HISTORY = {
   ],
 };
 
-/* ---------- PSALI O NÁS – Technický magazín 2016–2025 ---------- */
+/* ---------- HISTORIE MLUVENÝM SLOVEM (podklady od klienta – DOPLNIT) ----------
+   Až klient pošle nahrávku a fotografie:
+   1) nahrávku uložit jako assets/audio/historie-mluvene-slovo.mp3,
+   2) fotografie do assets/img/historie/ a vypsat je níže do scenes,
+   3) enabled: true.
+   Snímek trvá přesně tak dlouho jako nahrávka; fotografie se rozloží rovnoměrně,
+   nebo podle „at“ (sekunda nahrávky, kdy se fotka objeví).
+   text = krátký titulek k fotce (na veletrhu bývá hluk – titulek pomůže).    */
+const STORY = {
+  enabled: false,
+  audio: "assets/audio/historie-mluvene-slovo.mp3",
+  fallbackSeconds: 60,     // délka snímku, kdyby se nahrávka nenačetla
+  kicker: "Historie firmy",
+  title: "Od kamenolomu ke strojírně",
+  scenes: [
+    { img: "assets/img/2016-areal.jpg", text: "Areál v Olšovci" },
+    { img: "assets/img/msv/msv-1-olsovecke-strojirny.jpg", text: "Olšovecké strojírny na MSV Brno" },
+    { img: "assets/img/2019-jednaci-mistnost.jpg", text: "Obchodní jednání na statku" },
+  ],
+};
+
+/* ---------- PRAVIDELNĚ NA MSV BRNO ---------- */
+const MSV = {
+  kicker: "Mezinárodní strojírenský veletrh Brno",
+  title: "Na MSV Brno pravidelně od roku 1994",
+  lead: "Každý rok se se zákazníky a partnery potkáváme na volné ploše u pavilonu G1. Letos znovu – přijďte se k nám podívat!",
+  since: 1994,
+  photos: [
+    { img: "assets/img/msv/msv-1-olsovecke-strojirny.jpg", y: "Počátky", t: "Ještě jako Olšovecké strojírny spol. s r.o." },
+    { img: "assets/img/msv/msv-2-strojirny-olsovec.jpg", y: "Nový název", t: "Již jako Strojírny Olšovec s.r.o." },
+    { img: "assets/img/msv/msv-2018.jpg", y: "2018", t: "25 let zakázkové výroby" },
+    { img: "assets/img/msv/msv-2025.jpg", y: "2025", t: "Tradiční stánek u pavilonu G1" },
+  ],
+};
+
+/* ---------- CERTIFIKÁTY (PDF od klienta, certifikační orgán LL-C) ---------- */
+const CERTS = {
+  kicker: "Prokázaná odbornost",
+  title: "Certifikovaná kvalita a svařování",
+  lead: "Nezávislé certifikace LL-C (Certification) Czech Republic a.s. potvrzují, že vyrábíme a svařujeme podle nejpřísnějších evropských norem.",
+  items: [
+    { img: "assets/img/cert/cert-iso-9001.jpg", norm: "EN ISO 9001:2015", t: "Systém managementu kvality",
+      d: "Výroba a opravy ocelových konstrukcí, strojních zařízení, manipulační techniky a dopravních systémů. Zámečnictví, obrábění.", since: "certifikováno od roku 2001" },
+    { img: "assets/img/cert/cert-iso-3834-2.jpg", norm: "EN ISO 3834-2:2021", t: "Nejvyšší úroveň jakosti při svařování",
+      d: "Svařování metodami MAG (135), TIG (141) a obalenou elektrodou (111). Svářečský dozor: 2× EWE – evropský svářečský inženýr.", since: "certifikováno od roku 2001" },
+    { img: "assets/img/cert/cert-en-1090.jpg", norm: "EN 1090-1 · EXC3", t: "Provádění ocelových konstrukcí",
+      d: "Osvědčení o shodě řízení výroby pro stavební ocelové konstrukce v třídě provedení EXC3 (nařízení EU 305/2011).", since: "certifikováno od roku 2015" },
+  ],
+};
+
+/* ---------- PSALI O NÁS – Technický magazín ---------- */
 const PRESS_INTRO = {
   kicker: "Psali o nás",
-  title: "Technický magazín 2016–2025",
+  title: "Technický magazín",   // roky (2016–20xx) se doplní automaticky podle hotových článků
   sub: "Každý rok k Mezinárodnímu strojírenskému veletrhu přinášíme novinky z Olšovce.",
 };
 const ARTICLES = [
@@ -174,6 +244,15 @@ const ARTICLES = [
       "Nový hydrostatický izotermický rotační stroj pro výkony v řádu MW",
       "Dotace Aplikace DeepTech na prototyp motoru s Technickou univerzitou v Liberci",
     ],
+  },
+  {
+    // DOPLNIT – článek pro TechMagazín 2026 (klient pošle příští týden).
+    // Stránky časopisu do assets/img/pages/2026-1.jpg (a 2026-2.jpg), fotky do assets/img/2026-*.jpg,
+    // doplnit title, points a přepnout ready: true.
+    y: 2026, ready: false, title: "DOPLNIT titulek článku",
+    src: "TechMagazín 2026", pages: ["assets/img/pages/2026-1.jpg"],
+    photos: [],
+    points: [],
   },
 ];
 
