@@ -1,0 +1,2 @@
+Sem ukladejte nahravky mluveneho slova (MP3) pod nazvy z data.js (SEQUENCE, audio: ...).
+Seznam souboru a texty: "Text pro namluveni.md" v hlavni slozce zakazky.

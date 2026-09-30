@@ -24,28 +24,38 @@ const CONFIG = {
   director: "Ing. Pavel Stupárek, jednatel",
 };
 
-/* ---------- HUDBA A MLUVENÉ SLOVO ----------
-   Hudební podkres hraje stále dokola (skladby v pořadí, pak znovu od první).
-   Soubory MP3 vložte do složky assets/audio. Chybějící soubor se tiše přeskočí.
-   Při mluveném slově se hudba automaticky ztiší.                            */
-const AUDIO = {
-  music: ["assets/audio/hudba-1.mp3", "assets/audio/hudba-2.mp3"],
-  musicVolume: 35,   // hlasitost hudby v % (0 = vypnuto); lze změnit i v servisním panelu
-  voiceVolume: 100,  // hlasitost mluveného slova v %
-  duckTo: 25,        // při mluveném slově hraje hudba jen na x % své hlasitosti
+/* ---------- MLUVENÉ SLOVO ----------
+   Text klienta (e-mail 30. 9. 2026) se zobrazuje na snímcích a je zároveň podkladem pro namluvení.
+   Nahrávku ke snímku stačí uložit pod názvem uvedeným u snímku v SEQUENCE (audio: …) do složky
+   assets/audio/slovo/. Snímek se pak automaticky prodlouží na délku nahrávky.
+   Chybějící soubor se tiše přeskočí – snímek běží podle délky textu.
+   Hudební podkres byl na přání klienta odstraněn (30. 9. 2026).                                   */
+const VOICE = {
+  folder: "assets/audio/slovo/",
+  volume: 100,       // hlasitost mluveného slova v %; lze změnit i v servisním panelu
+  delaySeconds: 1.2, // nahrávka začne chvíli po nástupu snímku
 };
 
 /* ---------- POŘADÍ SNÍMKŮ ----------
    type  = šablona snímku (viz app.js), chapter = kapitola na spodní liště,
    k     = násobek minimální délky snímku (1 = slideSeconds)
-   Snímky s delším textem se prodlouží automaticky (readingWpm).            */
+   audio = nahrávka mluveného slova (soubor ve VOICE.folder), nepovinné
+   Snímky s delším textem se prodlouží automaticky (readingWpm).
+   Pořadí podle e-mailu klienta z 30. 9. 2026 (body 2–9), pak původní obsah.  */
 const SEQUENCE = [
-  { type: "intro",    chapter: "Úvod", k: 0.9 },
-  { type: "story",    chapter: "Historie" },          // mluvené slovo + fotografie (zapne se v STORY.enabled)
+  { type: "tale", id: "lom",         chapter: "Historie", audio: "01-historie-1902.mp3" },
+  { type: "tale", id: "privatizace", chapter: "Historie", audio: "02-privatizace-1992.mp3" },
+  { type: "tale", id: "rozvoj",      chapter: "Historie", audio: "03-rozvoj.mp3" },
+  { type: "tale", id: "lis",         chapter: "Historie", audio: "04-lis-zdas-2008.mp3" },
   { type: "history",  chapter: "Historie", k: 1.3 },
-  { type: "msv",      chapter: "MSV Brno", k: 1.6 },
-  { type: "certs",    chapter: "Certifikáty", k: 1.4 },
-  { type: "pressIntro", chapter: "Psali o nás", k: 0.7 },
+  { type: "msv",      chapter: "MSV Brno", k: 1.8, audio: "05-msv-brno.mp3" },
+  { type: "certs",    chapter: "Certifikáty", k: 1.4, audio: "06-certifikaty.mp3" },
+  { type: "tale", id: "fve",         chapter: "O firmě", audio: "07-fotovoltaika.mp3" },
+  { type: "tale", id: "zakazky",     chapter: "O firmě", k: 1.6, audio: "08-zakazky.mp3" },
+  { type: "tale", id: "statek",      chapter: "O firmě", k: 1.4, audio: "09-obchodni-oddeleni.mp3" },
+  { type: "tale", id: "lide",        chapter: "O firmě", audio: "10-pracovnici.mp3" },
+  { type: "intro",    chapter: "Psali o nás", k: 0.9 },    // údaje z původního úvodu (bod 1 e-mailu 30. 9.)
+  { type: "pressIntro", chapter: "Psali o nás", k: 0.8, audio: "11-technicky-magazin.mp3" },
   { type: "article", y: 2016, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2017, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2018, chapter: "Psali o nás", k: 1.25 },
@@ -66,7 +76,90 @@ const SEQUENCE = [
   { type: "cta",      chapter: "Kalkulačka", k: 1.1 },
 ];
 
-/* ---------- ÚVOD ---------- */
+/* ---------- VYPRÁVĚNÍ S FOTOGRAFIEMI (text klienta z 30. 9. 2026 = mluvené slovo) ----------
+   text   = odstavce textu (zobrazí se na snímku a slouží jako podklad k namluvení)
+   stats  = zvýrazněná čísla pod textem (nepovinné)
+   photos = fotografie; mode: "fit" (celá fotka na rozmazaném pozadí – výchozí),
+            "cover" (vyplní rámeček, ořízne okraje),
+            "print" (malá / stará fotka v bílém rámečku; zoom = max. zvětšení vůči FullHD)
+   cap    = krátký popisek k fotce (nepovinné)                                                   */
+const TALES = {
+  lom: {
+    kicker: "Historie firmy", year: "1902", title: "Od kamenolomu k opravárenským dílnám",
+    text: [
+      "Historie firmy se datuje od roku 1902, kdy byl otevřen místní kamenolom, který zaměstnává řadu lidí z okolí.",
+      // POZOR: „1958“ je v textu klienta – chronologicky patří před rok 1948 (Zemská donucovací pracovna
+      // zanikla po válce), pravděpodobně 1938. Ověřit u klienta.
+      "V roce 1958 lom prožívá velký rozvoj v období, kdy se jeho správcem stává Zemská donucovací pracovna v Brně. Jsou realizovány velké investice do strojního zařízení a modernizace provozu, lom zaměstnává 115 zaměstnanců a obrat činí 2 mil. Kč.",
+      "V roce 1948 lom přechází pod státní správu. Dolní budova slouží jako opravárenské dílny pro lomy na severní Moravě.",
+    ],
+    photos: [
+      { img: "assets/img/historie/historie-lom-1.jpg", mode: "print", zoom: 2.6 },
+      { img: "assets/img/historie/historie-lom-2.jpg", mode: "print", zoom: 2.6 },
+      { img: "assets/img/historie/historie-drtic.jpg", mode: "print", zoom: 1.6 },
+    ],
+  },
+  privatizace: {
+    kicker: "Historie firmy", year: "1992", title: "Privatizace opravárenských dílen",
+    text: ["V roce 1992 v rámci velké privatizace je provoz opravárenských dílen Štěrkoven a pískoven Olomouc koupen současným majitelem. V tu dobu činí roční obrat provozu 5 mil. Kč a zaměstnává 25 pracovníků."],
+    stats: [{ v: "5 mil. Kč", l: "roční obrat v roce 1992" }, { v: "25", l: "pracovníků" }],
+    photos: [{ img: "assets/img/historie/historie-1992-dilny.jpg", mode: "print", zoom: 2.6 }],
+  },
+  rozvoj: {
+    kicker: "Historie firmy", year: "po roce 1992", title: "Neustálý rozvoj",
+    text: ["Firma v průběhu následujících let neustále opravuje, přistavuje a zlepšuje podmínky pro své podnikání. Z počátku investuje do strojního vybavení tak, že nakupuje starší stroje podle toho, jak se vyvíjí poptávky našich zákazníků."],
+    photos: [{ img: "assets/img/firma/areal-shora.jpg" }],
+  },
+  lis: {
+    kicker: "Historie firmy", year: "2008", title: "Jedinečný zakružovací lis ŽĎAS",
+    text: ["V době finanční krize v roce 2008 se firmě podařilo zakoupit jedinečný stroj, který vyrobila firma Žďas jako jediný v republice. Jedná se o speciální lis pro zakružování tlustých plechů a výrobu trubek do výšky jednoho metru a průměru od 300 mm do 2500 mm ze síly plechu 15 až 100 mm."],
+    stats: [{ v: "Ø 300–2500", l: "průměr trubky (mm)" }, { v: "15–100", l: "síla plechu (mm)" }, { v: "1 m", l: "výška trubky" }],
+    photos: [
+      { img: "assets/img/firma/lis-zdas-1.jpg" },
+      { img: "assets/img/firma/lis-zdas-2.jpg" },
+      { img: "assets/img/firma/lis-zdas-skruze.jpg" },
+    ],
+  },
+  fve: {
+    kicker: "Životní prostředí a úspory energie", year: "290 kW", title: "Fotovoltaika na střechách výrobních budov",
+    // V textu klienta je „290 kWh“ – u výkonu elektrárny jde o kW. Ověřit u klienta.
+    text: ["Pokud se týká vztahu k životnímu prostředí a úsporám energie, vybudovala firma v roce 2010 a poté v roce 2024 a 2026 na střechách výrobních budov fotovoltaické elektrárny o celkovém výkonu 290 kW, které nám umožňují šetřit spotřebovanou elektrickou energii a krýt spotřebu z obnovitelných zdrojů."],
+    photos: [
+      { img: "assets/img/firma/areal-fve-2.jpg" },
+      { img: "assets/img/firma/areal-fve-1.jpg" },
+    ],
+  },
+  zakazky: {
+    kicker: "Reference", title: "Velké kusové zakázky",
+    text: ["Za dobu své existence firma zhotovila řadu velkých kusových zakázek, z nichž některé jsou na přiložených fotografiích."],
+    photos: [
+      { img: "assets/img/zakazky/zakazka-1.jpg" },
+      { img: "assets/img/zakazky/zakazka-2.jpg" },
+      { img: "assets/img/zakazky/zakazka-3.jpg" },
+      { img: "assets/img/zakazky/zakazka-4.jpg" },
+      { img: "assets/img/zakazky/zakazka-5.jpg" },
+      { img: "assets/img/zakazky/zakazka-6.jpg", mode: "print", zoom: 2.2 },
+    ],
+  },
+  statek: {
+    kicker: "Obchodní oddělení · Olšovec 37", title: "Kanceláře v rekonstruovaném statku",
+    text: ["Obchodní oddělení je vzhledem k omezeným kancelářským prostorám ve výrobním areálu umístěno v areálu rekonstruovaného statku uprostřed vesnice na adrese Olšovec 37, který tvoří příjemné pracovní prostředí pro pracovníky obchodního a ekonomického úseku."],
+    photos: [
+      { img: "assets/img/statek/statek-1.jpg" },
+      { img: "assets/img/statek/statek-2.jpg" },
+      { img: "assets/img/statek/kancelar-1.jpg" },
+      { img: "assets/img/statek/kancelar-2.jpg" },
+      { img: "assets/img/statek/kancelar-3.jpg" },
+    ],
+  },
+  lide: {
+    kicker: "Naši lidé", title: "Kvalifikovaní pracovníci",
+    text: ["Aby firma zvládla vysoké nároky na realizaci kusových zakázek, musí mít ve výrobě kvalifikované pracovníky. Skupinové foto z roku 2016 u příležitosti Dne otevřených dveří ve firmě zachycuje pracovníky Strojíren Olšovec před výrobním areálem."],
+    photos: [{ img: "assets/img/firma/pracovnici-2016.jpg", cap: "Den otevřených dveří 2016" }],
+  },
+};
+
+/* ---------- ÚVOD → nyní první snímek sekce „Psali o nás“ (bod 1 e-mailu 30. 9.) ---------- */
 const INTRO = {
   img: "assets/img/2023-misic-preprava.jpg",
   kicker: "Rodinná firma z Olšovce u Hranic",
@@ -97,37 +190,18 @@ const HISTORY = {
   ],
 };
 
-/* ---------- HISTORIE MLUVENÝM SLOVEM (podklady od klienta – DOPLNIT) ----------
-   Až klient pošle nahrávku a fotografie:
-   1) nahrávku uložit jako assets/audio/historie-mluvene-slovo.mp3,
-   2) fotografie do assets/img/historie/ a vypsat je níže do scenes,
-   3) enabled: true.
-   Snímek trvá přesně tak dlouho jako nahrávka; fotografie se rozloží rovnoměrně,
-   nebo podle „at“ (sekunda nahrávky, kdy se fotka objeví).
-   text = krátký titulek k fotce (na veletrhu bývá hluk – titulek pomůže).    */
-const STORY = {
-  enabled: false,
-  audio: "assets/audio/historie-mluvene-slovo.mp3",
-  fallbackSeconds: 60,     // délka snímku, kdyby se nahrávka nenačetla
-  kicker: "Historie firmy",
-  title: "Od kamenolomu ke strojírně",
-  scenes: [
-    { img: "assets/img/2016-areal.jpg", text: "Areál v Olšovci" },
-    { img: "assets/img/msv/msv-1-olsovecke-strojirny.jpg", text: "Olšovecké strojírny na MSV Brno" },
-    { img: "assets/img/2019-jednaci-mistnost.jpg", text: "Obchodní jednání na statku" },
-  ],
-};
-
 /* ---------- PRAVIDELNĚ NA MSV BRNO ---------- */
 const MSV = {
   kicker: "Mezinárodní strojírenský veletrh Brno",
   title: "Na MSV Brno pravidelně od roku 1994",
-  lead: "Každý rok se se zákazníky a partnery potkáváme na volné ploše u pavilonu G1. Letos znovu – přijďte se k nám podívat!",
+  lead: "Svou pozici na trhu firma neustále vylepšuje pravidelnou návštěvou na brněnském strojírenském veletrhu, kde nabízí své stále se rozšiřující služby již od roku 1994 až do dnešní doby.",
   since: 1994,
   photos: [
     { img: "assets/img/msv/msv-1-olsovecke-strojirny.jpg", y: "Počátky", t: "Ještě jako Olšovecké strojírny spol. s r.o." },
     { img: "assets/img/msv/msv-2-strojirny-olsovec.jpg", y: "Nový název", t: "Již jako Strojírny Olšovec s.r.o." },
+    { img: "assets/img/msv/msv-2015.jpg", y: "2015", t: "Stánek Strojíren Olšovec" },
     { img: "assets/img/msv/msv-2018.jpg", y: "2018", t: "25 let zakázkové výroby" },
+    { img: "assets/img/msv/msv-2019.jpg", y: "2019", t: "Tým Strojíren Olšovec" },
     { img: "assets/img/msv/msv-2025.jpg", y: "2025", t: "Tradiční stánek u pavilonu G1" },
   ],
 };
@@ -136,7 +210,7 @@ const MSV = {
 const CERTS = {
   kicker: "Prokázaná odbornost",
   title: "Certifikovaná kvalita a svařování",
-  lead: "Nezávislé certifikace LL-C (Certification) Czech Republic a.s. potvrzují, že vyrábíme a svařujeme podle nejpřísnějších evropských norem.",
+  lead: "Zvyšování odbornosti firmy dokládají certifikáty, které firma vlastní a neustále udržuje v platnosti. Certifikační orgán: LL-C (Certification) Czech Republic a.s.",
   items: [
     { img: "assets/img/cert/cert-iso-9001.jpg", norm: "EN ISO 9001:2015", t: "Systém managementu kvality",
       d: "Výroba a opravy ocelových konstrukcí, strojních zařízení, manipulační techniky a dopravních systémů. Zámečnictví, obrábění.", since: "certifikováno od roku 2001" },
@@ -151,7 +225,7 @@ const CERTS = {
 const PRESS_INTRO = {
   kicker: "Psali o nás",
   title: "Technický magazín",   // roky (2016–20xx) se doplní automaticky podle hotových článků
-  sub: "Každý rok k Mezinárodnímu strojírenskému veletrhu přinášíme novinky z Olšovce.",
+  sub: "Již řadu let se firma pravidelně prezentuje v době veletrhu ve veletržním čísle Technického magazínu.",
 };
 const ARTICLES = [
   {

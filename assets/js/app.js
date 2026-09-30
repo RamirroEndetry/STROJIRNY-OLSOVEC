@@ -12,8 +12,8 @@ const mil = n => cz(n / 1e6, 2) + " mil. Kč";
 const filled = s => s && !/DOPLNIT/.test(s);   // placeholdery se na obrazovce nezobrazují
 
 /* ---------- nastavení (data.js + localStorage) ---------- */
-const SETTINGS_KEY = "so-msv-settings-v3";
-const DEFAULTS = { slideSeconds: CONFIG.slideSeconds, readingWpm: CONFIG.readingWpm, calcIdleSeconds: CONFIG.calcIdleSeconds, musicVolume: AUDIO.musicVolume, voiceVolume: AUDIO.voiceVolume, eff: CALC_DEFAULTS.eff, modulePower: CALC_DEFAULTS.modulePower, moduleCapex: CALC_DEFAULTS.moduleCapex, moduleOpex: CALC_DEFAULTS.moduleOpex };
+const SETTINGS_KEY = "so-msv-settings-v4";
+const DEFAULTS = { slideSeconds: CONFIG.slideSeconds, readingWpm: CONFIG.readingWpm, calcIdleSeconds: CONFIG.calcIdleSeconds, voiceVolume: VOICE.volume, eff: CALC_DEFAULTS.eff, modulePower: CALC_DEFAULTS.modulePower, moduleCapex: CALC_DEFAULTS.moduleCapex, moduleOpex: CALC_DEFAULTS.moduleOpex };
 const settings = Object.assign({}, DEFAULTS);
 try { Object.assign(settings, JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}")); } catch (e) {}
 const saveSettings = () => { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {} };
@@ -21,7 +21,7 @@ document.documentElement.style.setProperty("--fade", CONFIG.fadeSeconds + "s");
 document.documentElement.style.setProperty("--pfade", CONFIG.photoFadeSeconds + "s");
 
 const READY_ARTICLES = ARTICLES.filter(a => a.ready !== false);
-const PLAY = SEQUENCE.filter(s => (s.type !== "story" || STORY.enabled) && (s.type !== "article" || READY_ARTICLES.some(a => a.y === s.y)));
+const PLAY = SEQUENCE.filter(s => (s.type !== "tale" || TALES[s.id]) && (s.type !== "article" || READY_ARTICLES.some(a => a.y === s.y)));
 
 /* Střídání fotografií uvnitř snímku: nová fotka se plynule prolne přes starou,
    stará zůstane pod ní (i s pohybem) až do konce prolnutí → žádné poskočení ani probliknutí.
@@ -57,6 +57,21 @@ const d = s => `style="--d:${s}s"`;
 const statsHtml = stats => `<div class="stats">${stats.map((st, i) => `<div class="stat a" ${d(1 + i * .25)}><div class="v" data-count="${st.v}" data-plain="${st.plain ? 1 : ""}" data-prefix="${st.prefix || ""}" data-suffix="${st.suffix || ""}">${st.prefix || ""}0${st.suffix || ""}</div><div class="l">${st.label}</div></div>`).join("")}</div>`;
 const stepHead = n => `<div class="stephead a" ${d(0)}><div class="dots">${[1, 2, 3, 4].map(k => `<i class="${k === n ? "on" : k < n ? "done" : ""}">${k}</i>`).join("")}</div><div><div class="kicker">Krok ${n} ze 4 · ${STEPS.title}</div><h2>${[STEPS.problem.title, STEPS.solution.title, STEPS.economics.title, "Návratnost investice"][n - 1]}</h2></div></div>`;
 
+/* fotka ve snímku: fit = celá fotka na rozmazaném pozadí, cover = vyplní rámeček, print = malá fotka v bílém rámečku */
+const photoHtml = p => {
+  const cap = p.cap ? `<div class="cap">${p.cap}</div>` : "";
+  if (p.mode === "cover") return `<div class="ph" style="background-image:url('${p.img}')">${cap}</div>`;
+  if (p.mode === "print") return `<div class="ph print"><img src="${p.img}" alt="" data-zoom="${p.zoom || 1}">${cap}</div>`;
+  return `<div class="ph fit"><div class="blur" style="background-image:url('${p.img}')"></div><img src="${p.img}" alt="">${cap}</div>`;
+};
+/* malá fotka smí být zvětšená nejvýše zoom× (vztaženo k FullHD), vždy se ale vejde do rámečku */
+function sizePrint(img) {
+  const z = +img.dataset.zoom || 1, w = img.naturalWidth, h = img.naturalHeight;
+  if (!w || !h) return;
+  img.style.width = `min(${(w * z / 10.8).toFixed(1)}vh, 100cqw - 1.2rem, (100cqh - 1.2rem) * ${(w / h).toFixed(4)})`;
+}
+const voiceBadge = `<div class="voice"><span class="eq"><i></i><i></i><i></i><i></i></span>Mluvené slovo</div>`;
+
 const TEMPLATES = {
   intro: () => ({ html: `
     <div class="bg kb" style="background-image:url('${INTRO.img}')"></div><div class="shade"></div>
@@ -79,24 +94,27 @@ const TEMPLATES = {
       </div>
     </div>` }),
 
-  story: () => {
+  /* vyprávění (text klienta = mluvené slovo) + střídající se fotografie */
+  tale: s => {
+    const t = TALES[s.id], allPrint = t.photos.every(p => p.mode === "print");
     let stop = null;
     return {
       html: `
-      <div class="photos full">${STORY.scenes.map(sc => `<div class="ph" style="background-image:url('${sc.img}')">${sc.text ? `<div class="cap">${sc.text}</div>` : ""}</div>`).join("")}</div>
-      <div class="shade"></div>
-      <div class="hero-in story-in">
-        <div class="kicker a" ${d(.3)}>${STORY.kicker}</div>
-        <h1 class="a" ${d(.6)}>${STORY.title}</h1>
-        <div class="voice a" ${d(1.2)}><span class="eq"><i></i><i></i><i></i><i></i></span>Poslechněte si náš příběh</div>
+      <div class="body split">
+        <div class="txt">
+          <div class="kicker a" ${d(0)}>${t.kicker}</div>
+          ${t.year ? `<div class="year a" ${d(.1)}>${t.year}</div>` : ""}
+          <h2 class="a" ${d(.3)}>${t.title}</h2>
+          <div class="say">${t.text.map((p, i) => `<p class="a" ${d(.9 + i * 1.2)}>${p}</p>`).join("")}</div>
+          ${t.stats ? `<div class="tstats">${t.stats.map((st, i) => `<div class="a" ${d(1.4 + t.text.length * 1.2 + i * .3)}><b>${st.v}</b><span>${st.l}</span></div>`).join("")}</div>` : ""}
+          ${voiceBadge}
+        </div>
+        <div class="vis a" ${d(.2)}>
+          <div class="photos${allPrint ? " prints" : ""}">${t.photos.map(photoHtml).join("")}</div>
+        </div>
       </div>`,
-      enter(node, sec) {
-        const n = STORY.scenes.length;
-        const times = STORY.scenes.every((sc, i) => i === 0 || sc.at != null) ? STORY.scenes.map(sc => (sc.at || 0) * 1000) : sec * 1000 / n;
-        stop = cycler(node, ".photos .ph", times);
-        voiceStart();
-      },
-      leave() { stop?.(); voiceStop(); },
+      enter(node, sec) { stop = cycler(node, ".photos .ph", sec * 1000 / t.photos.length); },
+      leave() { stop?.(); },
     };
   },
 
@@ -288,8 +306,8 @@ function readSeconds(node) {
   const last = Math.max(0, ...[...node.querySelectorAll(".a")].map(e => parseFloat(e.style.getPropertyValue("--d")) || 0));
   return Math.max(last + 4, words / (settings.readingWpm / 60) + 3);
 }
-const secOf = sl => sl.spec.type === "story" ? (STORY._dur || STORY.fallbackSeconds) + 1.5
-  : Math.max(3, settings.slideSeconds * (sl.spec.k || 1), sl.read);
+/* Má-li snímek nahrávku mluveného slova, trvá nejméně do jejího konce. */
+const secOf = sl => Math.max(3, settings.slideSeconds * (sl.spec.k || 1), sl.read, voiceDur(sl.spec) ? voiceDur(sl.spec) + VOICE.delaySeconds + 2 : 0);
 
 function buildShow() {
   $("topFair").textContent = CONFIG.fairName;
@@ -298,6 +316,7 @@ function buildShow() {
     const t = TEMPLATES[s.type](s);
     const node = el("div", "s s-" + s.type, t.html);
     $("slides").appendChild(node);
+    node.querySelectorAll("img[data-zoom]").forEach(img => img.complete ? sizePrint(img) : img.addEventListener("load", () => sizePrint(img)));
     show.slides.push({ node, spec: s, t, read: readSeconds(node) });
   });
   CHAPTERS.forEach(c => {
@@ -332,6 +351,7 @@ function goSlide(n) {
   });
   fitSlide(cur.node);
   cur.t.enter?.(cur.node, sec);
+  voiceStart(cur);
   updateChapters(cur.spec, sec);
   clearTimeout(show.timer);
   if (!show.paused) show.timer = setTimeout(() => goSlide(show.i + 1), sec * 1000);
@@ -391,54 +411,47 @@ function fitSlide(node) {
 }
 window.addEventListener("resize", () => { const cur = show.slides[show.i]; if (cur) fitSlide(cur.node); });
 
-function pauseShow() { show.paused = true; clearTimeout(show.timer); const cur = show.slides[show.i]; cur?.t.leave?.(cur.node); }
+function pauseShow() { show.paused = true; clearTimeout(show.timer); voiceStop(); const cur = show.slides[show.i]; cur?.t.leave?.(cur.node); }
 function resumeShow() { show.paused = false; goSlide(show.i + 1); }
 
 /* =====================================================================
-   ZVUK – hudební podkres ve smyčce + mluvené slovo (hudba se při něm ztiší)
-   Prohlížeč smí přehrát zvuk bez dotyku jen v kiosk režimu s povoleným
-   autoplay (viz .bat); jinak se zvuk spustí při prvním dotyku obrazovky.
+   MLUVENÉ SLOVO – každý snímek může mít vlastní nahrávku (SEQUENCE … audio)
+   Hudba byla na přání klienta odstraněna. Prohlížeč smí přehrát zvuk bez dotyku
+   jen v kiosk režimu s povoleným autoplay (viz .bat); jinak až po prvním dotyku.
    ===================================================================== */
-const snd = { music: new Audio(), voice: new Audio(), list: (AUDIO.music || []).slice(), i: 0, duck: false, voiceOn: false, vol: 0 };
-function musicWanted() { return snd.list.length > 0 && settings.musicVolume > 0; }
-function loadTrack() {
-  if (!snd.list.length) { snd.music.pause(); return; }
-  snd.music.src = snd.list[snd.i]; snd.music.loop = snd.list.length === 1;
-  playMusic();
+const VO = {};   // soubor → { ok, dur }
+const voicePath = spec => spec.audio ? VOICE.folder + spec.audio : null;
+const voiceDur = spec => { const v = VO[voicePath(spec)]; return v && v.ok ? v.dur : 0; };
+/* načte délky nahrávek (chybějící soubory se tiše přeskočí); hotovo nejpozději za 4 s */
+function loadVoices() {
+  const paths = [...new Set(PLAY.map(voicePath).filter(Boolean))];
+  return Promise.race([
+    Promise.all(paths.map(path => new Promise(res => {
+      const a = new Audio(); VO[path] = { ok: false, dur: 0 };
+      a.preload = "metadata";
+      a.addEventListener("loadedmetadata", () => { if (isFinite(a.duration)) VO[path] = { ok: true, dur: a.duration }; res(); });
+      a.addEventListener("error", () => res());
+      a.src = path;
+    }))),
+    new Promise(res => setTimeout(res, 4000)),
+  ]);
 }
-function playMusic() { if (musicWanted()) snd.music.play().catch(() => {}); else snd.music.pause(); }
-// pojistka: pokud se hudba nespustila (zvuk po startu PC ještě nebyl připraven), zkoušet to znovu
-setInterval(() => { if (snd.music.paused && musicWanted() && snd.music.src) playMusic(); }, 3000);
-snd.music.addEventListener("playing", () => document.body.dataset.hudba = "hraje");
-snd.music.addEventListener("pause", () => document.body.dataset.hudba = "stoji");
-snd.music.addEventListener("ended", () => { snd.i = (snd.i + 1) % snd.list.length; loadTrack(); });
-snd.music.addEventListener("error", () => {   // chybějící / poškozený soubor přeskočit
-  console.warn("Hudba nenalezena:", snd.list[snd.i]);
-  snd.list.splice(snd.i, 1); if (snd.i >= snd.list.length) snd.i = 0; loadTrack();
-});
-// plynulé změny hlasitosti (ztlumení při mluveném slově, náběh na začátku)
-setInterval(() => {
-  const target = settings.musicVolume / 100 * (snd.duck ? AUDIO.duckTo / 100 : 1);
-  snd.vol += Math.max(-0.02, Math.min(0.02, target - snd.vol));
-  snd.music.volume = Math.max(0, Math.min(1, snd.vol));
-}, 50);
-if (STORY.enabled) {
-  snd.voice.preload = "auto"; snd.voice.src = STORY.audio;
-  snd.voice.addEventListener("loadedmetadata", () => { if (isFinite(snd.voice.duration)) STORY._dur = snd.voice.duration; });
-  snd.voice.addEventListener("error", () => console.warn("Mluvené slovo nenalezeno:", STORY.audio));
-}
-function voiceStart() {
-  if (!STORY.enabled) return;
-  snd.voiceOn = true; snd.duck = true;
+const snd = { voice: new Audio(), timer: null, node: null };
+snd.voice.addEventListener("playing", () => snd.node?.classList.add("speaking"));
+["pause", "ended"].forEach(ev => snd.voice.addEventListener(ev, () => snd.node?.classList.remove("speaking")));
+function voiceStart(sl) {
+  voiceStop();
+  const path = voicePath(sl.spec);
+  if (!path || !VO[path]?.ok || settings.voiceVolume <= 0) return;
+  snd.node = sl.node;
+  snd.voice.src = path;
   snd.voice.volume = Math.min(1, settings.voiceVolume / 100);
-  try { snd.voice.currentTime = 0; } catch (e) {}
-  setTimeout(() => { if (snd.voiceOn) snd.voice.play().catch(() => {}); }, 1200);   // hudba se mezitím ztiší
+  snd.timer = setTimeout(() => snd.voice.play().catch(() => {}), VOICE.delaySeconds * 1000);
 }
-function voiceStop() { snd.voiceOn = false; snd.duck = false; snd.voice.pause(); }
-// odemknutí zvuku prvním dotykem, pokud prohlížeč blokuje automatické přehrávání
-["pointerdown", "keydown", "touchstart"].forEach(ev => document.addEventListener(ev, () => {
-  if (snd.music.paused && musicWanted()) playMusic();
-}, { passive: true }));
+function voiceStop() {
+  clearTimeout(snd.timer); snd.voice.pause();
+  snd.node?.classList.remove("speaking"); snd.node = null;
+}
 
 /* =====================================================================
    DOTYK → KALKULAČKA, nečinnost → zpět do prezentace
@@ -563,12 +576,12 @@ function npKey(k) {
 /* =====================================================================
    SERVIS – v kalkulačce podržet logo 3 s
    ===================================================================== */
-const ADMIN_FIELDS = [["slideSeconds", "Minimální délka snímku", "s"], ["readingWpm", "Rychlost čtení (delší text = delší snímek)", "slov/min"], ["musicVolume", "Hlasitost hudby (0 = vypnuto)", "%"], ["voiceVolume", "Hlasitost mluveného slova", "%"], ["calcIdleSeconds", "Zavření kalkulačky po nečinnosti", "s"], ["eff", "Čistá elektrická účinnost", "%"], ["modulePower", "Jmenovitý výkon modulu", "kWe"], ["moduleCapex", "Cena 1 modulu", "Kč"], ["moduleOpex", "Roční servis 1 modulu", "Kč/rok"]];
+const ADMIN_FIELDS = [["slideSeconds", "Minimální délka snímku", "s"], ["readingWpm", "Rychlost čtení (delší text = delší snímek)", "slov/min"], ["voiceVolume", "Hlasitost mluveného slova (0 = vypnuto)", "%"], ["calcIdleSeconds", "Zavření kalkulačky po nečinnosti", "s"], ["eff", "Čistá elektrická účinnost", "%"], ["modulePower", "Jmenovitý výkon modulu", "kWe"], ["moduleCapex", "Cena 1 modulu", "Kč"], ["moduleOpex", "Roční servis 1 modulu", "Kč/rok"]];
 function buildAdmin() {
   buildAdminFields();
   $("adminClose").addEventListener("click", () => {
     settings.readingWpm = Math.max(40, settings.readingWpm); saveSettings(); $("admin").classList.add("hidden"); calc();
-    show.slides.forEach(sl => sl.read = readSeconds(sl.node)); playMusic();
+    show.slides.forEach(sl => sl.read = readSeconds(sl.node));
   });
   $("adminReset").addEventListener("click", () => { Object.assign(settings, DEFAULTS); saveSettings(); buildAdminFields(); });
   $("adminFs").addEventListener("click", () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); });
@@ -593,7 +606,7 @@ document.addEventListener("keydown", e => {
 });
 document.addEventListener("contextmenu", e => e.preventDefault());
 
-buildShow(); buildCalc(); buildNumpad(); buildAdmin(); loadTrack();
+buildShow(); buildCalc(); buildNumpad(); buildAdmin();
 window.prezentace = { go: n => goSlide(n), pause: pauseShow, resume: resumeShow, casy: () => show.slides.map(sl => sl.spec.type + (sl.spec.y || "") + ": " + Math.round(secOf(sl)) + " s") };   // pro servis z konzole
-goSlide(0);
+loadVoices().then(() => goSlide(0));
 })();

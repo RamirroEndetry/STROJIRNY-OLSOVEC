@@ -157,12 +157,17 @@ img { display: block; }
 .s .mag.photo { width: 18rem; }
 .s .mag span { display: block; margin-top: .5rem; font-size: 1rem; font-weight: 700; color: #cfd9e1; text-align: center; }
 
-/* ---------- historie mluveným slovem ---------- */
-.s .photos.full { inset: 0; border-radius: 0; box-shadow: none; }
+/* ---------- vyprávění (text klienta = mluvené slovo) + fotky ---------- */
 .s .photos { z-index: 0; }   /* vlastní vrstva – fotky nepřekryjí text snímku */
-.s .photos .cap { position: absolute; right: 4.5rem; bottom: calc(var(--bot) + 2.4rem); max-width: 40rem; padding: .8rem 1.4rem; border-radius: .8rem; background: rgba(8,12,16,.72); font-size: 1.6rem; font-weight: 700; color: #fff; }
-.s .story-in { max-width: 55vw; }
-.voice { display: inline-flex; align-items: center; gap: 1rem; margin-top: 1.6rem; font-size: 1.5rem; font-weight: 700; color: #dfe7ee; }
+.s .photos .cap { position: absolute; left: 1.4rem; bottom: 1.4rem; z-index: 3; max-width: 40rem; padding: .7rem 1.2rem; border-radius: .8rem; background: rgba(8,12,16,.72); font-size: 1.45rem; font-weight: 700; color: #fff; }
+.s-tale .split { grid-template-columns: 1fr 1.15fr; }
+.s-tale .year { font-size: 5.6rem; }
+.s-tale .say p { margin: 0 0 1.1rem; font-size: 1.85rem; line-height: 1.42; color: #e6edf3; }
+.tstats { display: flex; flex-wrap: wrap; gap: 1rem 2.6rem; margin-top: 1.2rem; }
+.tstats b { display: block; font-size: 2.8rem; font-weight: 900; color: var(--green2); letter-spacing: -.02em; line-height: 1.05; }
+.tstats span { display: block; margin-top: .3rem; font-size: 1.2rem; color: var(--muted); }
+.voice { display: none; align-items: center; gap: 1rem; margin-top: 1.2rem; font-size: 1.3rem; font-weight: 700; color: #dfe7ee; }
+.s.speaking .voice { display: inline-flex; }
 .eq { display: inline-flex; align-items: flex-end; gap: .25rem; height: 1.8rem; }
 .eq i { width: .4rem; height: 100%; border-radius: .2rem; background: var(--heat2); transform-origin: bottom; animation: eq 1s ease-in-out infinite; }
 .eq i:nth-child(2) { animation-delay: -.3s; } .eq i:nth-child(3) { animation-delay: -.6s; } .eq i:nth-child(4) { animation-delay: -.15s; }
@@ -172,17 +177,18 @@ img { display: block; }
 .s-msv .split { grid-template-columns: .85fr 1.25fr; }
 /* MSV: fotky jako vytištěné snímky v bílém rámečku – ve své skutečné velikosti, nikdy se nezvětšují */
 .s .photos.prints { background: none; box-shadow: none; overflow: visible; border-radius: 0; }
-.s .photos .ph.print { display: flex; align-items: center; justify-content: center; }
+.s .photos .ph.print { display: flex; align-items: center; justify-content: center; container-type: size; }
 .s .photos .ph.print img { max-width: 100%; max-height: 100%; width: auto; height: auto; border: .6rem solid #fff; border-radius: .3rem; box-shadow: 0 1.4rem 3rem rgba(0,0,0,.6); background: #fff; }
-.s-msv.on .photos .ph.print.on, .s-msv.on .photos .ph.print.out { animation: none; }
+.s .photos .ph.print img[data-zoom] { height: auto; max-height: none; }   /* velikost počítá app.js (sizePrint) */
+.s.on .photos .ph.print.on, .s.on .photos .ph.print.out { animation: none; }
 .s .photos .ph.print.out { opacity: 0; transition: opacity var(--pfade, 2.4s) ease; }   /* různě velké fotky: klasické prolnutí */
 .s .photos .ph.fit { background: #000; }
 .s .photos .ph.fit .blur { position: absolute; inset: -6%; background-size: cover; background-position: center; filter: blur(1.6rem) brightness(.45) saturate(.8); }
 .s .photos .ph.fit > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 1.4rem rgba(0,0,0,.5)); }
 .s .photos .ph.fit .cap { right: auto; left: 1.4rem; bottom: 1.4rem; font-size: 1.45rem; }
 .s .photos .ph.fit .cap b { color: var(--heat2); margin-right: .7rem; }
-.msv-list { display: flex; flex-direction: column; gap: .7rem; margin-top: .6rem; }
-.msv-list .yi { display: flex; align-items: baseline; gap: 1.2rem; padding: .8rem 1.2rem; border-radius: 1rem; border: 1px solid var(--line); background: rgba(26,35,45,.7); transition: background .8s, border-color .8s, transform .8s; }
+.msv-list { display: flex; flex-direction: column; gap: .5rem; margin-top: .4rem; }
+.msv-list .yi { display: flex; align-items: baseline; gap: 1.2rem; padding: .6rem 1.2rem; border-radius: 1rem; border: 1px solid var(--line); background: rgba(26,35,45,.7); transition: background .8s, border-color .8s, transform .8s; }
 .msv-list .yi b { min-width: 9.5rem; font-size: 1.7rem; font-weight: 900; color: var(--heat2); }
 .msv-list .yi span { font-size: 1.45rem; color: #dbe4ec; }
 .msv-list .yi.cur { background: rgba(226,0,26,.2); border-color: var(--red); transform: translateX(.6rem); }
@@ -368,7 +374,7 @@ img { display: block; }
   .s .vis { height: 34vh; }
   .grants, .cases { grid-template-columns: 1fr 1fr; }
   .certs { grid-template-columns: 1fr; gap: 1rem; } .cert .doc { height: 17rem; }
-  .s-msv .split { grid-template-columns: 1fr; } .s .story-in { max-width: none; }
+  .s-msv .split, .s-tale .split { grid-template-columns: 1fr; }
   .road, .assump, .nofuel { grid-template-columns: 1fr 1fr; }
   .tl .it span { font-size: 1rem; }
   .show-bar { flex-direction: column-reverse; justify-content: center; gap: 1rem; }
