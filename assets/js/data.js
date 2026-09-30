@@ -77,8 +77,11 @@ const SEQUENCE = [
 ];
 
 /* ---------- VYPRÁVĚNÍ S FOTOGRAFIEMI (text klienta z 30. 9. 2026 = mluvené slovo) ----------
-   text   = odstavce textu (zobrazí se na snímku a slouží jako podklad k namluvení)
-   stats  = zvýrazněná čísla pod textem (nepovinné)
+   Na přání klienta (30. 9.) se text NEZOBRAZUJE – snímek ukazuje jen fotografie přes celou
+   obrazovku s krátkým popiskem (kicker, year, title) a hraje nahrávka.
+   Položky „say“ (zde i u MSV, CERTS, PRESS_INTRO) jsou jen podklad k namluvení.
+   text   = odstavce mluveného slova (nezobrazují se)
+   stats  = nepoužívá se
    photos = fotografie; mode: "fit" (celá fotka na rozmazaném pozadí – výchozí),
             "cover" (vyplní rámeček, ořízne okraje),
             "print" (malá / stará fotka v bílém rámečku; zoom = max. zvětšení vůči FullHD)
@@ -86,7 +89,7 @@ const SEQUENCE = [
 const TALES = {
   lom: {
     kicker: "Historie firmy", year: "1902", title: "Od kamenolomu k opravárenským dílnám",
-    text: [
+    say: [
       "Historie firmy se datuje od roku 1902, kdy byl otevřen místní kamenolom, který zaměstnává řadu lidí z okolí.",
       // POZOR: „1958“ je v textu klienta – chronologicky patří před rok 1948 (Zemská donucovací pracovna
       // zanikla po válce), pravděpodobně 1938. Ověřit u klienta.
@@ -94,25 +97,25 @@ const TALES = {
       "V roce 1948 lom přechází pod státní správu. Dolní budova slouží jako opravárenské dílny pro lomy na severní Moravě.",
     ],
     photos: [
-      { img: "assets/img/historie/historie-lom-1.jpg", mode: "print", zoom: 2.6 },
-      { img: "assets/img/historie/historie-lom-2.jpg", mode: "print", zoom: 2.6 },
-      { img: "assets/img/historie/historie-drtic.jpg", mode: "print", zoom: 1.6 },
+      { img: "assets/img/historie/historie-lom-1.jpg", mode: "print", zoom: 3.2 },
+      { img: "assets/img/historie/historie-lom-2.jpg", mode: "print", zoom: 3.2 },
+      { img: "assets/img/historie/historie-drtic.jpg", mode: "print", zoom: 2 },
     ],
   },
   privatizace: {
     kicker: "Historie firmy", year: "1992", title: "Privatizace opravárenských dílen",
-    text: ["V roce 1992 v rámci velké privatizace je provoz opravárenských dílen Štěrkoven a pískoven Olomouc koupen současným majitelem. V tu dobu činí roční obrat provozu 5 mil. Kč a zaměstnává 25 pracovníků."],
+    say: ["V roce 1992 v rámci velké privatizace je provoz opravárenských dílen Štěrkoven a pískoven Olomouc koupen současným majitelem. V tu dobu činí roční obrat provozu 5 mil. Kč a zaměstnává 25 pracovníků."],
     stats: [{ v: "5 mil. Kč", l: "roční obrat v roce 1992" }, { v: "25", l: "pracovníků" }],
-    photos: [{ img: "assets/img/historie/historie-1992-dilny.jpg", mode: "print", zoom: 2.6 }],
+    photos: [{ img: "assets/img/historie/historie-1992-dilny.jpg", mode: "print", zoom: 3.2 }],
   },
   rozvoj: {
     kicker: "Historie firmy", year: "po roce 1992", title: "Neustálý rozvoj",
-    text: ["Firma v průběhu následujících let neustále opravuje, přistavuje a zlepšuje podmínky pro své podnikání. Z počátku investuje do strojního vybavení tak, že nakupuje starší stroje podle toho, jak se vyvíjí poptávky našich zákazníků."],
+    say: ["Firma v průběhu následujících let neustále opravuje, přistavuje a zlepšuje podmínky pro své podnikání. Z počátku investuje do strojního vybavení tak, že nakupuje starší stroje podle toho, jak se vyvíjí poptávky našich zákazníků."],
     photos: [{ img: "assets/img/firma/areal-shora.jpg" }],
   },
   lis: {
     kicker: "Historie firmy", year: "2008", title: "Jedinečný zakružovací lis ŽĎAS",
-    text: ["V době finanční krize v roce 2008 se firmě podařilo zakoupit jedinečný stroj, který vyrobila firma Žďas jako jediný v republice. Jedná se o speciální lis pro zakružování tlustých plechů a výrobu trubek do výšky jednoho metru a průměru od 300 mm do 2500 mm ze síly plechu 15 až 100 mm."],
+    say: ["V době finanční krize v roce 2008 se firmě podařilo zakoupit jedinečný stroj, který vyrobila firma Žďas jako jediný v republice. Jedná se o speciální lis pro zakružování tlustých plechů a výrobu trubek do výšky jednoho metru a průměru od 300 mm do 2500 mm ze síly plechu 15 až 100 mm."],
     stats: [{ v: "Ø 300–2500", l: "průměr trubky (mm)" }, { v: "15–100", l: "síla plechu (mm)" }, { v: "1 m", l: "výška trubky" }],
     photos: [
       { img: "assets/img/firma/lis-zdas-1.jpg" },
@@ -123,7 +126,7 @@ const TALES = {
   fve: {
     kicker: "Životní prostředí a úspory energie", year: "290 kW", title: "Fotovoltaika na střechách výrobních budov",
     // V textu klienta je „290 kWh“ – u výkonu elektrárny jde o kW. Ověřit u klienta.
-    text: ["Pokud se týká vztahu k životnímu prostředí a úsporám energie, vybudovala firma v roce 2010 a poté v roce 2024 a 2026 na střechách výrobních budov fotovoltaické elektrárny o celkovém výkonu 290 kW, které nám umožňují šetřit spotřebovanou elektrickou energii a krýt spotřebu z obnovitelných zdrojů."],
+    say: ["Pokud se týká vztahu k životnímu prostředí a úsporám energie, vybudovala firma v roce 2010 a poté v roce 2024 a 2026 na střechách výrobních budov fotovoltaické elektrárny o celkovém výkonu 290 kW, které nám umožňují šetřit spotřebovanou elektrickou energii a krýt spotřebu z obnovitelných zdrojů."],
     photos: [
       { img: "assets/img/firma/areal-fve-2.jpg" },
       { img: "assets/img/firma/areal-fve-1.jpg" },
@@ -131,7 +134,7 @@ const TALES = {
   },
   zakazky: {
     kicker: "Reference", title: "Velké kusové zakázky",
-    text: ["Za dobu své existence firma zhotovila řadu velkých kusových zakázek, z nichž některé jsou na přiložených fotografiích."],
+    say: ["Za dobu své existence firma zhotovila řadu velkých kusových zakázek, z nichž některé jsou na přiložených fotografiích."],
     photos: [
       { img: "assets/img/zakazky/zakazka-1.jpg" },
       { img: "assets/img/zakazky/zakazka-2.jpg" },
@@ -143,7 +146,7 @@ const TALES = {
   },
   statek: {
     kicker: "Obchodní oddělení · Olšovec 37", title: "Kanceláře v rekonstruovaném statku",
-    text: ["Obchodní oddělení je vzhledem k omezeným kancelářským prostorám ve výrobním areálu umístěno v areálu rekonstruovaného statku uprostřed vesnice na adrese Olšovec 37, který tvoří příjemné pracovní prostředí pro pracovníky obchodního a ekonomického úseku."],
+    say: ["Obchodní oddělení je vzhledem k omezeným kancelářským prostorám ve výrobním areálu umístěno v areálu rekonstruovaného statku uprostřed vesnice na adrese Olšovec 37, který tvoří příjemné pracovní prostředí pro pracovníky obchodního a ekonomického úseku."],
     photos: [
       { img: "assets/img/statek/statek-1.jpg" },
       { img: "assets/img/statek/statek-2.jpg" },
@@ -154,7 +157,7 @@ const TALES = {
   },
   lide: {
     kicker: "Naši lidé", title: "Kvalifikovaní pracovníci",
-    text: ["Aby firma zvládla vysoké nároky na realizaci kusových zakázek, musí mít ve výrobě kvalifikované pracovníky. Skupinové foto z roku 2016 u příležitosti Dne otevřených dveří ve firmě zachycuje pracovníky Strojíren Olšovec před výrobním areálem."],
+    say: ["Aby firma zvládla vysoké nároky na realizaci kusových zakázek, musí mít ve výrobě kvalifikované pracovníky. Skupinové foto z roku 2016 u příležitosti Dne otevřených dveří ve firmě zachycuje pracovníky Strojíren Olšovec před výrobním areálem."],
     photos: [{ img: "assets/img/firma/pracovnici-2016.jpg", cap: "Den otevřených dveří 2016" }],
   },
 };
@@ -194,7 +197,7 @@ const HISTORY = {
 const MSV = {
   kicker: "Mezinárodní strojírenský veletrh Brno",
   title: "Na MSV Brno pravidelně od roku 1994",
-  lead: "Svou pozici na trhu firma neustále vylepšuje pravidelnou návštěvou na brněnském strojírenském veletrhu, kde nabízí své stále se rozšiřující služby již od roku 1994 až do dnešní doby.",
+  say: "Svou pozici na trhu firma neustále vylepšuje pravidelnou návštěvou na brněnském strojírenském veletrhu, kde nabízí své stále se rozšiřující služby již od roku 1994 až do dnešní doby.",
   since: 1994,
   photos: [
     { img: "assets/img/msv/msv-1-olsovecke-strojirny.jpg", y: "Počátky", t: "Ještě jako Olšovecké strojírny spol. s r.o." },
@@ -210,7 +213,8 @@ const MSV = {
 const CERTS = {
   kicker: "Prokázaná odbornost",
   title: "Certifikovaná kvalita a svařování",
-  lead: "Zvyšování odbornosti firmy dokládají certifikáty, které firma vlastní a neustále udržuje v platnosti. Certifikační orgán: LL-C (Certification) Czech Republic a.s.",
+  say: "Zvyšování odbornosti firmy dokládají certifikáty, které firma vlastní a neustále udržuje v platnosti.",
+  lead: "Certifikační orgán: LL-C (Certification) Czech Republic a.s.",
   items: [
     { img: "assets/img/cert/cert-iso-9001.jpg", norm: "EN ISO 9001:2015", t: "Systém managementu kvality",
       d: "Výroba a opravy ocelových konstrukcí, strojních zařízení, manipulační techniky a dopravních systémů. Zámečnictví, obrábění.", since: "certifikováno od roku 2001" },
@@ -225,7 +229,7 @@ const CERTS = {
 const PRESS_INTRO = {
   kicker: "Psali o nás",
   title: "Technický magazín",   // roky (2016–20xx) se doplní automaticky podle hotových článků
-  sub: "Již řadu let se firma pravidelně prezentuje v době veletrhu ve veletržním čísle Technického magazínu.",
+  say: "Již řadu let se firma pravidelně prezentuje v době veletrhu ve veletržním čísle Technického magazínu.",
 };
 const ARTICLES = [
   {

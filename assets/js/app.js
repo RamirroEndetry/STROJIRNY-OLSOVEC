@@ -94,24 +94,17 @@ const TEMPLATES = {
       </div>
     </div>` }),
 
-  /* vyprávění (text klienta = mluvené slovo) + střídající se fotografie */
+  /* vyprávění: fotografie přes celou obrazovku + mluvené slovo (text se nezobrazuje, jen krátký popisek) */
   tale: s => {
-    const t = TALES[s.id], allPrint = t.photos.every(p => p.mode === "print");
+    const t = TALES[s.id];
     let stop = null;
     return {
       html: `
-      <div class="body split">
-        <div class="txt">
-          <div class="kicker a" ${d(0)}>${t.kicker}</div>
-          ${t.year ? `<div class="year a" ${d(.1)}>${t.year}</div>` : ""}
-          <h2 class="a" ${d(.3)}>${t.title}</h2>
-          <div class="say">${t.text.map((p, i) => `<p class="a" ${d(.9 + i * 1.2)}>${p}</p>`).join("")}</div>
-          ${t.stats ? `<div class="tstats">${t.stats.map((st, i) => `<div class="a" ${d(1.4 + t.text.length * 1.2 + i * .3)}><b>${st.v}</b><span>${st.l}</span></div>`).join("")}</div>` : ""}
-          ${voiceBadge}
-        </div>
-        <div class="vis a" ${d(.2)}>
-          <div class="photos${allPrint ? " prints" : ""}">${t.photos.map(photoHtml).join("")}</div>
-        </div>
+      <div class="photos full">${t.photos.map(photoHtml).join("")}</div>
+      <div class="tale-cap">
+        <div class="kicker a" ${d(.4)}>${t.kicker}</div>
+        <div class="tt a" ${d(.6)}>${t.year ? `<b>${t.year}</b>` : ""}${t.title}</div>
+        ${voiceBadge}
       </div>`,
       enter(node, sec) { stop = cycler(node, ".photos .ph", sec * 1000 / t.photos.length); },
       leave() { stop?.(); },
@@ -126,7 +119,6 @@ const TEMPLATES = {
         <div class="txt">
           <div class="kicker a" ${d(0)}>${MSV.kicker}</div>
           <h2 class="a" ${d(.2)}>${MSV.title}</h2>
-          <p class="lead a" ${d(.5)}>${MSV.lead}</p>
           <div class="msv-list">${MSV.photos.map((p, i) => `<div class="yi a" data-i="${i}" ${d(1 + i * .3)}><b>${p.y}</b><span>${p.t}</span></div>`).join("")}
             <div class="yi now a" ${d(1 + MSV.photos.length * .3)}><b>${CONFIG.fairName.match(/\d{4}/)?.[0] || ""}</b><span>Těšíme se na vás – ${CONFIG.stand}</span></div></div>
         </div>
@@ -157,7 +149,6 @@ const TEMPLATES = {
     <div class="body center">
       <div class="kicker a" ${d(0)}>${PRESS_INTRO.kicker}</div>
       <h1 class="a" ${d(.2)}>${PRESS_INTRO.title} ${READY_ARTICLES[0].y}–${READY_ARTICLES[READY_ARTICLES.length - 1].y}</h1>
-      <div class="sub a" ${d(.4)}>${PRESS_INTRO.sub}</div>
       <div class="fan">${READY_ARTICLES.map((a, i) => { const n = READY_ARTICLES.length, r = (i - (n - 1) / 2) * 5; return `<div class="pg a" style="--d:${.6 + i * .18}s;--r:${r}deg;--y:${Math.abs(r) * .25}rem"><img src="${a.pages[0]}" alt=""><b>${a.y}</b></div>`; }).join("")}</div>
     </div>` }),
 

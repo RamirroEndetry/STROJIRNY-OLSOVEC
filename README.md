@@ -46,7 +46,9 @@ Hudební podkres byl na přání klienta (30. 9.) odstraněn. Mluvené slovo je 
 - Nahrávky (MP3) se ukládají do **`assets/audio/slovo/`** pod názvem uvedeným u snímku v `SEQUENCE` (`audio: …`),
   např. `01-historie-1902.mp3`. Seznam souborů a texty k namluvení jsou v `Text pro namluvení.md` (o složku výš).
 - Snímek s nahrávkou se automaticky prodlouží na její délku; během přehrávání svítí u textu ukazatel „Mluvené slovo“.
-- Chybějící nahrávka se tiše přeskočí – snímek běží podle délky textu (text je na obrazovce vždy).
+- Namluveno AI hlasem „Sterling“ (ElevenLabs, 30. 9. 2026). Namlouvaný text se na přání klienta **nezobrazuje** –
+  snímky s vyprávěním ukazují jen fotky přes celou obrazovku s krátkým popiskem; text je v data.js jen jako `say`.
+- Chybějící nahrávka se tiše přeskočí – snímek pak běží podle minimální délky.
 - Zvuk se přehraje hned po spuštění přes `Spustit prezentaci (kiosk).bat` (vlastní profil prohlížeče s povoleným
   automatickým přehráváním). Při otevření `index.html` jinak prohlížeč zvuk bez dotyku zablokuje.
 - Na místě zkontrolovat: výstup zvuku ve Windows nastavený na panel/reproduktor a hlasitost Windows.

@@ -160,13 +160,16 @@ img { display: block; }
 /* ---------- vyprávění (text klienta = mluvené slovo) + fotky ---------- */
 .s .photos { z-index: 0; }   /* vlastní vrstva – fotky nepřekryjí text snímku */
 .s .photos .cap { position: absolute; left: 1.4rem; bottom: 1.4rem; z-index: 3; max-width: 40rem; padding: .7rem 1.2rem; border-radius: .8rem; background: rgba(8,12,16,.72); font-size: 1.45rem; font-weight: 700; color: #fff; }
-.s-tale .split { grid-template-columns: 1fr 1.15fr; }
-.s-tale .year { font-size: 5.6rem; }
-.s-tale .say p { margin: 0 0 1.1rem; font-size: 1.85rem; line-height: 1.42; color: #e6edf3; }
-.tstats { display: flex; flex-wrap: wrap; gap: 1rem 2.6rem; margin-top: 1.2rem; }
-.tstats b { display: block; font-size: 2.8rem; font-weight: 900; color: var(--green2); letter-spacing: -.02em; line-height: 1.05; }
-.tstats span { display: block; margin-top: .3rem; font-size: 1.2rem; color: var(--muted); }
-.voice { display: none; align-items: center; gap: 1rem; margin-top: 1.2rem; font-size: 1.3rem; font-weight: 700; color: #dfe7ee; }
+/* fotky přes celou obrazovku: fotka se vejde mezi horní lištu a popisek, rozmazaná kopie vyplní zbytek */
+.s .photos.full { inset: 0; border-radius: 0; box-shadow: none; background: #0b1016; }
+.s .photos.full .ph.fit > img { top: calc(var(--top) + .4rem); left: 3rem; width: calc(100% - 6rem); height: calc(100% - var(--top) - var(--bot) - 7rem); }
+.s .photos.full .ph.print { padding: calc(var(--top) + .4rem) 0 calc(var(--bot) + 6.6rem); }
+.s .photos.full .ph .cap, .s .photos.full .ph.fit .cap { left: auto; right: 3rem; bottom: calc(var(--bot) + 1.4rem); }
+.s .tale-cap { position: absolute; left: 3rem; bottom: calc(var(--bot) + 1rem); z-index: 3; max-width: 70vw; padding: 1rem 1.6rem; border-radius: 1rem; background: rgba(8,12,16,.72); }
+.s .tale-cap .kicker { font-size: 1.2rem; margin-bottom: .3rem; }
+.s .tale-cap .tt { font-size: 2.3rem; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; }
+.s .tale-cap .tt b { color: var(--red2); font-weight: 900; margin-right: 1rem; }
+.voice { display: none; align-items: center; gap: 1rem; margin-top: .6rem; font-size: 1.15rem; font-weight: 700; color: #dfe7ee; }
 .s.speaking .voice { display: inline-flex; }
 .eq { display: inline-flex; align-items: flex-end; gap: .25rem; height: 1.8rem; }
 .eq i { width: .4rem; height: 100%; border-radius: .2rem; background: var(--heat2); transform-origin: bottom; animation: eq 1s ease-in-out infinite; }
