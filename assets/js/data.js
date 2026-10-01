@@ -65,15 +65,16 @@ const SEQUENCE = [
   { type: "article", y: 2024, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2025, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2026, chapter: "Psali o nás", k: 1.25 },   // zobrazí se, až bude článek ready: true
-  { type: "energy",   chapter: "Energie a dotace", k: 1.3 },
+  { type: "energy",   chapter: "Energie a dotace", k: 1.3, audio: "12-energie-a-dotace.mp3" },
   { type: "grants",   chapter: "Energie a dotace", k: 1.3 },
-  { type: "engine",   chapter: "Tepelný motor", k: 1.3 },
+  { type: "engine",   chapter: "Tepelný motor", k: 1.3, audio: "13-tepelny-motor.mp3" },
   { type: "roadmap",  chapter: "Tepelný motor", k: 1.2 },
-  { type: "step1",    chapter: "4 kroky", k: 1.2 },
+  { type: "step1",    chapter: "4 kroky", k: 1.2, audio: "14-ctyri-kroky.mp3" },
   { type: "step2",    chapter: "4 kroky", k: 1.3 },
   { type: "step3",    chapter: "4 kroky", k: 1.2 },
   { type: "step4",    chapter: "4 kroky", k: 1.4 },
-  { type: "cta",      chapter: "Kalkulačka", k: 1.1 },
+  { type: "cta",      chapter: "Kalkulačka", k: 1.1, audio: "15-kalkulacka.mp3" },
+  { type: "tale", id: "zaver",       chapter: "Závěr", audio: "16-zaver.mp3" },
 ];
 
 /* ---------- VYPRÁVĚNÍ S FOTOGRAFIEMI (text klienta z 30. 9. 2026 = mluvené slovo) ----------
@@ -91,9 +92,7 @@ const TALES = {
     kicker: "Historie firmy", year: "1902", title: "Od kamenolomu k opravárenským dílnám",
     say: [
       "Historie firmy se datuje od roku 1902, kdy byl otevřen místní kamenolom, který zaměstnává řadu lidí z okolí.",
-      // POZOR: „1958“ je v textu klienta – chronologicky patří před rok 1948 (Zemská donucovací pracovna
-      // zanikla po válce), pravděpodobně 1938. Ověřit u klienta.
-      "V roce 1958 lom prožívá velký rozvoj v období, kdy se jeho správcem stává Zemská donucovací pracovna v Brně. Jsou realizovány velké investice do strojního zařízení a modernizace provozu, lom zaměstnává 115 zaměstnanců a obrat činí 2 mil. Kč.",
+      "V roce 1928 lom prožívá velký rozvoj v období, kdy se jeho správcem stává Zemská donucovací pracovna v Brně. Jsou realizovány velké investice do strojního zařízení a modernizace provozu, lom zaměstnává 115 zaměstnanců a obrat činí 2 mil. Kč.",
       "V roce 1948 lom přechází pod státní správu. Dolní budova slouží jako opravárenské dílny pro lomy na severní Moravě.",
     ],
     photos: [
@@ -154,6 +153,11 @@ const TALES = {
       { img: "assets/img/statek/kancelar-2.jpg" },
       { img: "assets/img/statek/kancelar-3.jpg" },
     ],
+  },
+  zaver: {
+    kicker: "Závěr", title: "Těšíme se na další spolupráci s Vámi",
+    say: ["Z prezentace, kterou Vám předkládáme je patrné, že naše firma Vám může poskytovat své výrobky a služby. V budoucnu se na další spolupráci s Vámi těší kolektiv Strojíren Olšovec."],
+    photos: [{ img: "assets/img/firma/zaver-kolektiv.jpg" }],
   },
   lide: {
     kicker: "Naši lidé", title: "Kvalifikovaní pracovníci",
@@ -336,6 +340,7 @@ const ARTICLES = [
 
 /* ---------- ENERGIE A FONDY EU (letošní článek) ---------- */
 const ENERGY = {
+  say: "Rok 2026 je rokem, kdy firma v nebývalé míře využívá zdrojů z dotačních fondů pro úspory energií a hledá vlastní výrobní program pomocí dotačních titulů a vyvíjí několik typů tepelných motorů, které umožní z odpadního tepla získat čistou elektrickou energii.",
   kicker: "Letošní téma",
   title: "Úspory energií a fondy EU",
   intro: "Energetická soběstačnost a nižší uhlíková stopa. Využíváme fondy EU na nové obnovitelné zdroje a snižování emisí.",
@@ -352,13 +357,14 @@ const ENERGY = {
     { n: "RES+ č. 1/2024", d: "Nové fotovoltaické elektrárny 150 kW, celkem až 300 kW. Cíl: 50 % vlastní elektřiny.", tag: "dokončujeme 2026" },
     { n: "NPO – Čistší zdroje energie", d: "Fotovoltaika 50 kW realizovaná v roce 2023.", tag: "hotovo 2023" },
     { n: "Úspory energie II", d: "Stavební úpravy výrobních budov – úspora energií a lepší pracovní prostředí.", tag: "realizace" },
-    { n: "TREND (TA ČR)", d: "Výzkum a vývoj: zkušební linka pro jemné mletí teplárenské strusky s Prefou Brno a VÚSH Brno.", tag: "výzkum a vývoj" },
+    { n: "Théta 2 (TA ČR)", d: "Výzkum a vývoj – podporuje aplikovaný výzkum, vývoj a inovace v oblasti transformace a modernizace energetiky.", tag: "výzkum a vývoj" },
     { n: "Aplikace DeepTech", d: "Vývoj a výroba prototypu plynového tepelného motoru 50–100 kW s Technickou univerzitou v Liberci.", tag: "vývoj 2026–2029" },
   ],
 };
 
 /* ---------- TEPELNÝ PLYNOVÝ MOTOR ---------- */
 const ENGINE = {
+  say: "Na základě malého modelu tepelného parního motoru postupuje firma dále ve vývoji těchto strojů, který by měl být ukončen v roce 2028–2029 zhotovením prototypu motoru o výkonu 100 kW, provedením jeho zkoušek a stanovením účinnosti uzavřeného tepelného cyklu.",
   kicker: "Vlastní vývoj · s TU Liberec 2026–2029",
   title: "Tepelný plynový motor",
   lead: "Nová energetická jednotka: motor v uzavřeném termodynamickém cyklu s vnější dodávkou tepla, pracovní látkou je reálný plyn.",
@@ -381,6 +387,7 @@ const ENGINE = {
 
 /* ---------- ZÁVĚR VE 4 KROCÍCH (text klienta) ---------- */
 const STEPS = {
+  say: "Pro naše potenciální zákazníky jsme připravili prezentaci možností využití plynového parního motoru pracujícího s jejich odpadním teplem, tj. energií, kterou doposud nevyužívali.",
   title: "Odpadní teplo → vlastní elektřina",
   problem: {
     title: "Problém zákazníka",
@@ -415,6 +422,7 @@ const STEPS = {
 
 /* ---------- VÝZVA NA KONCI SMYČKY ---------- */
 const CTA = {
+  say: "Pokud máte zájem, můžete si sami spočítat návratnost své investice při využití naší energetické jednotky, abyste mohli posoudit, zda by pro Vás mohla být tato investice vhodná a abyste nás případně mohli oslovit.",
   img: "assets/img/2025-motor-3d-model.jpg",
   kicker: "Kolik vám může vydělat odpadní teplo?",
   title: "Spočítejte si návratnost pro váš provoz",
