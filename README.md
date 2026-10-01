@@ -14,7 +14,7 @@ Bez internetu, bez instalace, bez serveru – stačí otevřít `index.html` v E
 3. Na místě: vypnout spořič obrazovky a uspávání displeje, vypnout aktualizace na dobu veletrhu,
    přidat `.bat` do složky *Po spuštění* (`shell:startup`).
 
-## Pořadí prezentace (smyčka cca 15 minut)
+## Pořadí prezentace (smyčka cca 12 minut)
 
 Podle e-mailu klienta z 21. 9. (bod 3), doplněno podle připomínek z 29. 9. a 30. 9.:
 
@@ -35,9 +35,10 @@ Na spodní liště je vidět, v které kapitole prezentace je, a stálá výzva 
 
 ## Délka snímků a přechody
 
-Každý snímek trvá tak dlouho, aby šel dočíst celý text: délka = delší z hodnot *minimální délka × k* a
-*počet slov / rychlost čtení* (`CONFIG.readingWpm`, výchozí 140 slov/min). Má-li snímek nahrávku mluveného slova,
-trvá nejméně do jejího konce. Snímky i fotografie se plynule prolínají (`fadeSeconds`, `photoFadeSeconds`).
+**Snímek s nahrávkou** trvá právě tak dlouho jako mluvené slovo (klient nechce tichá místa): délka nahrávky +
+krátký náběh a doběh (`VOICE.delaySeconds`, `tailSeconds`), nejméně však tak, aby se vystřídaly všechny fotky
+(`VOICE.minPhotoSeconds` na fotku). **Snímek bez nahrávky** trvá podle množství textu: delší z hodnot
+*`slideSeconds` × k* a *počet slov / `readingWpm`*. Snímky i fotografie se plynule prolínají (`fadeSeconds`, `photoFadeSeconds`).
 Délky všech snímků vypíše v konzoli prohlížeče `prezentace.casy()`.
 
 ## Mluvené slovo

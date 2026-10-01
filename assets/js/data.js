@@ -8,8 +8,8 @@
    ===================================================================== */
 
 const CONFIG = {
-  slideSeconds: 16,          // minimální délka snímku prezentace (× k v SEQUENCE)
-  readingWpm: 140,           // rychlost čtení (slov/min) – snímek s delším textem se automaticky prodlouží,
+  slideSeconds: 16,          // minimální délka snímku BEZ mluveného slova (× k v SEQUENCE)
+  readingWpm: 140,           // rychlost čtení (slov/min) – snímek bez nahrávky s delším textem se automaticky prodlouží,
                              // aby návštěvník stihl dočíst celý text
   fadeSeconds: 1.8,          // plynulé prolnutí snímků
   photoFadeSeconds: 2.4,     // plynulé prolnutí fotografií uvnitř snímku
@@ -33,7 +33,10 @@ const CONFIG = {
 const VOICE = {
   folder: "assets/audio/slovo/",
   volume: 100,       // hlasitost mluveného slova v %; lze změnit i v servisním panelu
-  delaySeconds: 1.2, // nahrávka začne chvíli po nástupu snímku
+  delaySeconds: 0.6, // nahrávka začne chvíli po nástupu snímku
+  tailSeconds: 0.8,  // po konci nahrávky snímek hned končí (klient nechce tichá místa)
+  photoFadeSeconds: 1.4, // rychlejší prolnutí fotek ve snímku s nahrávkou
+  minPhotoSeconds: 2.6, // každá fotka ve snímku s nahrávkou je vidět aspoň takto dlouho
 };
 
 /* ---------- POŘADÍ SNÍMKŮ ----------

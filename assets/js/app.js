@@ -12,7 +12,7 @@ const mil = n => cz(n / 1e6, 2) + " mil. Kč";
 const filled = s => s && !/DOPLNIT/.test(s);   // placeholdery se na obrazovce nezobrazují
 
 /* ---------- nastavení (data.js + localStorage) ---------- */
-const SETTINGS_KEY = "so-msv-settings-v4";
+const SETTINGS_KEY = "so-msv-settings-v6";
 const DEFAULTS = { slideSeconds: CONFIG.slideSeconds, readingWpm: CONFIG.readingWpm, calcIdleSeconds: CONFIG.calcIdleSeconds, voiceVolume: VOICE.volume, eff: CALC_DEFAULTS.eff, modulePower: CALC_DEFAULTS.modulePower, moduleCapex: CALC_DEFAULTS.moduleCapex, moduleOpex: CALC_DEFAULTS.moduleOpex };
 const settings = Object.assign({}, DEFAULTS);
 try { Object.assign(settings, JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}")); } catch (e) {}
@@ -27,7 +27,7 @@ const PLAY = SEQUENCE.filter(s => (s.type !== "tale" || TALES[s.id]) && (s.type 
    stará zůstane pod ní (i s pohybem) až do konce prolnutí → žádné poskočení ani probliknutí.
    times = pole okamžiků [ms] pro každou fotku, nebo jedno číslo = interval. */
 function cycler(node, sel, times, onChange) {
-  const items = [...node.querySelectorAll(sel)], fade = CONFIG.photoFadeSeconds * 1000, timers = [];
+  const items = [...node.querySelectorAll(sel)], fade = (parseFloat(node.dataset.pfade) || CONFIG.photoFadeSeconds) * 1000, timers = [];
   if (!items.length) return () => {};
   const at = Array.isArray(times) ? times : items.map((_, i) => i * times);
   const every = Array.isArray(times) ? 0 : times;
@@ -297,8 +297,13 @@ function readSeconds(node) {
   const last = Math.max(0, ...[...node.querySelectorAll(".a")].map(e => parseFloat(e.style.getPropertyValue("--d")) || 0));
   return Math.max(last + 4, words / (settings.readingWpm / 60) + 3);
 }
-/* Má-li snímek nahrávku mluveného slova, trvá nejméně do jejího konce. */
-const secOf = sl => Math.max(3, settings.slideSeconds * (sl.spec.k || 1), sl.read, voiceDur(sl.spec) ? voiceDur(sl.spec) + VOICE.delaySeconds + 2 : 0);
+/* Snímek s nahrávkou trvá právě tak dlouho jako mluvené slovo (bez tichého dobíhání) – jen tak dlouho,
+   aby se stihly vystřídat všechny fotky a doběhnout animace. Snímek bez nahrávky se řídí délkou textu. */
+const secOf = sl => {
+  const vd = settings.voiceVolume > 0 ? voiceDur(sl.spec) : 0;
+  if (vd) return Math.max(vd + VOICE.delaySeconds + VOICE.tailSeconds, sl.photos * VOICE.minPhotoSeconds, sl.anim + 1.5);
+  return Math.max(3, settings.slideSeconds * (sl.spec.k || 1), sl.read);
+};
 
 function buildShow() {
   $("topFair").textContent = CONFIG.fairName;
@@ -307,8 +312,11 @@ function buildShow() {
     const t = TEMPLATES[s.type](s);
     const node = el("div", "s s-" + s.type, t.html);
     $("slides").appendChild(node);
+    if (s.audio) { node.dataset.pfade = VOICE.photoFadeSeconds; node.style.setProperty("--pfade", VOICE.photoFadeSeconds + "s"); }
     node.querySelectorAll("img[data-zoom]").forEach(img => img.complete ? sizePrint(img) : img.addEventListener("load", () => sizePrint(img)));
-    show.slides.push({ node, spec: s, t, read: readSeconds(node) });
+    show.slides.push({ node, spec: s, t, read: readSeconds(node),
+      photos: node.querySelectorAll(".photos .ph").length,
+      anim: Math.max(0, ...[...node.querySelectorAll(".a")].map(e => parseFloat(e.style.getPropertyValue("--d")) || 0)) });
   });
   CHAPTERS.forEach(c => {
     const n = PLAY.filter(s => s.chapter === c).length;
@@ -413,19 +421,23 @@ function resumeShow() { show.paused = false; goSlide(show.i + 1); }
 const VO = {};   // soubor → { ok, dur }
 const voicePath = spec => spec.audio ? VOICE.folder + spec.audio : null;
 const voiceDur = spec => { const v = VO[voicePath(spec)]; return v && v.ok ? v.dur : 0; };
-/* načte délky nahrávek (chybějící soubory se tiše přeskočí); hotovo nejpozději za 4 s */
+/* Načte délky nahrávek – postupně jednu po druhé a spojení hned uvolní (prohlížeč dovolí jen několik
+   souběžných stahování). Chybějící soubory se tiše přeskočí. Prezentace začne, až jsou délky známé
+   (nejpozději za 8 s); zbytek se případně donačte za běhu. */
 function loadVoices() {
   const paths = [...new Set(PLAY.map(voicePath).filter(Boolean))];
-  return Promise.race([
-    Promise.all(paths.map(path => new Promise(res => {
-      const a = new Audio(); VO[path] = { ok: false, dur: 0 };
-      a.preload = "metadata";
-      a.addEventListener("loadedmetadata", () => { if (isFinite(a.duration)) VO[path] = { ok: true, dur: a.duration }; res(); });
-      a.addEventListener("error", () => res());
-      a.src = path;
-    }))),
-    new Promise(res => setTimeout(res, 4000)),
-  ]);
+  paths.forEach(path => VO[path] = { ok: false, dur: 0 });
+  const one = path => new Promise(res => {
+    const a = new Audio(); let done = false;
+    const fin = ok => { if (done) return; done = true; if (ok && isFinite(a.duration)) VO[path] = { ok: true, dur: a.duration }; a.removeAttribute("src"); a.load(); res(); };
+    a.preload = "metadata";
+    a.addEventListener("loadedmetadata", () => fin(true));
+    a.addEventListener("error", () => fin(false));
+    setTimeout(() => fin(false), 5000);
+    a.src = path;
+  });
+  const all = paths.reduce((chain, path) => chain.then(() => one(path)), Promise.resolve());
+  return Promise.race([all, new Promise(res => setTimeout(res, 8000))]);
 }
 const snd = { voice: new Audio(), timer: null, node: null };
 snd.voice.addEventListener("playing", () => snd.node?.classList.add("speaking"));
