@@ -353,7 +353,11 @@ function goSlide(n) {
   voiceStart(cur);
   updateChapters(cur.spec, sec);
   clearTimeout(show.timer);
-  if (!show.paused) show.timer = setTimeout(() => goSlide(show.i + 1), sec * 1000);
+  if (!show.paused) show.timer = setTimeout(function next() {
+    // mluvené slovo se nikdy neutne: pokud ještě hraje (např. se nahrávka načítala déle), počkat na jeho konec
+    if (snd.node === cur.node && !snd.voice.paused && !snd.voice.ended) { show.timer = setTimeout(next, 300); return; }
+    goSlide(show.i + 1);
+  }, sec * 1000);
 }
 
 function updateChapters(spec, sec) {
@@ -449,7 +453,13 @@ function voiceStart(sl) {
   snd.node = sl.node;
   snd.voice.src = path;
   snd.voice.volume = Math.min(1, settings.voiceVolume / 100);
-  snd.timer = setTimeout(() => snd.voice.play().catch(() => {}), VOICE.delaySeconds * 1000);
+  snd.timer = setTimeout(() => snd.voice.play().catch(e => {
+    // prohlížeč mimo kiosk režim nepustí zvuk před prvním dotykem → výzva k zapnutí zvuku
+    if (e && e.name === "NotAllowedError") { snd.blocked = true; $("soundAsk").classList.remove("hidden"); }
+  }), VOICE.delaySeconds * 1000);
+  // nahrávku dalšího snímku načíst předem, aby začala bez prodlevy
+  const nx = show.slides[(show.i + 1) % show.slides.length], np = nx && voicePath(nx.spec);
+  if (np && VO[np]?.ok) { snd.pre = new Audio(); snd.pre.preload = "auto"; snd.pre.src = np; }
 }
 function voiceStop() {
   clearTimeout(snd.timer); snd.voice.pause();
@@ -473,7 +483,11 @@ function closeCalc() {
   $("calcView").classList.add("hidden"); $("show").classList.remove("hidden");
   resumeShow();
 }
-$("show").addEventListener("click", openCalc);
+$("show").addEventListener("click", () => {
+  // první dotyk při zablokovaném zvuku jen zapne zvuk a spustí aktuální snímek znovu i s hlasem
+  if (snd.blocked) { snd.blocked = false; $("soundAsk").classList.add("hidden"); goSlide(show.i); return; }
+  openCalc();
+});
 // dotyk, který kalkulačku otevřel, nesmí zároveň stisknout tlačítko pod prstem
 let calcOpenedAt = 0;
 $("calcView").addEventListener("click", e => { if (performance.now() - calcOpenedAt < 450) { e.stopPropagation(); e.preventDefault(); } }, true);
