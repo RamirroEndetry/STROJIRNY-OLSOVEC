@@ -24,7 +24,7 @@ Podle e-mailu klienta z 21. 9. (bod 3), doplněno podle připomínek z 29. 9. a 
 | MSV Brno | Pravidelná účast od roku 1994 – fotografie stánku z různých ročníků (vč. 2015 a 2019) |
 | Certifikáty | EN ISO 9001, EN ISO 3834-2, EN 1090-1 EXC3 |
 | O firmě | Fotovoltaika 290 kW, velké kusové zakázky, obchodní oddělení na statku Olšovec 37, pracovníci (Den otevřených dveří 2016) |
-| Psali o nás | Údaje z původního úvodu (motto, firma v číslech, fotka na pozadí), přehled časopisů, články Technického magazínu 2016–2025, místo pro článek 2026 (`ready: true` po dodání) |
+| Psali o nás | Údaje z původního úvodu (motto, firma v číslech, fotka na pozadí), přehled časopisů, články Technického magazínu 2016–2026 |
 | Energie a dotace | Letošní téma: FVE, cíl 50 %, CO₂, 105 MWh; přehled projektů (OP TAK, RES+, NPO, Théta 2, DeepTech) |
 | Tepelný motor | Princip a přednosti; cesta k sériové výrobě (prototyp s TU Liberec 2026–2029) |
 | 4 kroky | Text „Závěr – 4 kroky“: problém zákazníka, animované schéma řešení, ekonomika, návratnost (cementárna, cihelna, BPS) |

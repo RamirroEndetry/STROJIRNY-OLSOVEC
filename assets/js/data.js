@@ -67,7 +67,7 @@ const SEQUENCE = [
   { type: "article", y: 2023, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2024, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2025, chapter: "Psali o nás", k: 1.25 },
-  { type: "article", y: 2026, chapter: "Psali o nás", k: 1.25 },   // zobrazí se, až bude článek ready: true
+  { type: "article", y: 2026, chapter: "Psali o nás", k: 1.25 },
   { type: "energy",   chapter: "Energie a dotace", k: 1.3, audio: "12-energie-a-dotace.mp3" },
   { type: "grants",   chapter: "Energie a dotace", k: 1.3 },
   { type: "engine",   chapter: "Tepelný motor", k: 1.3, audio: "13-tepelny-motor.mp3" },
@@ -331,13 +331,16 @@ const ARTICLES = [
     ],
   },
   {
-    // DOPLNIT – článek pro TechMagazín 2026 (klient pošle příští týden).
-    // Stránky časopisu do assets/img/pages/2026-1.jpg (a 2026-2.jpg), fotky do assets/img/2026-*.jpg,
-    // doplnit title, points a přepnout ready: true.
-    y: 2026, ready: false, title: "DOPLNIT titulek článku",
-    src: "TechMagazín 2026", pages: ["assets/img/pages/2026-1.jpg"],
-    photos: [],
-    points: [],
+    y: 2026, title: "Zlaté české ručičky (a chytré mozky) z Moravy",
+    src: "TechMagazín 9/2026", pages: ["assets/img/pages/2026-1.jpg", "assets/img/pages/2026-2.jpg"],
+    photos: ["assets/img/2026-ocelove-konstrukce.jpg", "assets/img/2026-strojni-zarizeni.jpg", "assets/img/2026-lanovy-buben.jpg", "assets/img/2026-nadoba.jpg", "assets/img/2026-strojni-dilce.jpg", "assets/img/2026-skruze.jpg"],
+    points: [
+      "Více než čtyři desítky vysoce kvalifikovaných zaměstnanců, areál na spojnici Olomouc–Ostrava",
+      "Strojní zařízení a svařence běžně do 10 tun, po dohodě i větší",
+      "Vlastní konstrukce: jednotlivé stroje i kompletní linky včetně technologie",
+      "Tepelný motor: s podporou MPO a TA ČR vznikají v letech 2026–2029 funkční prototypy",
+      "Odpadní teplo 100–200 °C mění v elektřinu – z 1 MW tepla přibližně 100 kW",
+    ],
   },
 ];
 
