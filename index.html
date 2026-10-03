@@ -10,13 +10,13 @@
 <script>
 /* Verze obsahu. Při každé změně zvyšte všude v tomto souboru i v souboru verze.txt.
    Na webu se podle verze.txt pozná, že prohlížeč drží starou stránku z mezipaměti, a načte se nová. */
-var APP_VER = "2026-10-03f";
+var APP_VER = "2026-10-03g";
 if (location.protocol !== "file:") fetch("verze.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : ""; }).then(function (t) {
   t = t.trim();
   if (t && t !== APP_VER && location.search.indexOf("v=" + t) < 0) location.replace(location.pathname + "?v=" + encodeURIComponent(t));
 }).catch(function () {});
 </script>
-<link rel="stylesheet" href="assets/css/app.css?v=2026-10-03f">
+<link rel="stylesheet" href="assets/css/app.css?v=2026-10-03g">
 </head>
 <body>
 
@@ -183,7 +183,7 @@ if (location.protocol !== "file:") fetch("verze.txt?t=" + Date.now(), { cache: "
   </svg>
 </template>
 
-<script src="assets/js/data.js?v=2026-10-03f"></script>
-<script src="assets/js/app.js?v=2026-10-03f"></script>
+<script src="assets/js/data.js?v=2026-10-03g"></script>
+<script src="assets/js/app.js?v=2026-10-03g"></script>
 </body>
 </html>
