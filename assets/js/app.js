@@ -90,7 +90,7 @@ const TEMPLATES = {
       <h2 class="a" ${d(.2)}>${HISTORY.title}</h2>
       <div class="tl">
         <div class="line a grow" ${d(.5)}></div>
-        ${HISTORY.items.map((it, i) => `<div class="it ${i % 2 ? "dn" : "up"} a" style="--d:${1 + i * .9}s;left:${8 + i * (84 / (HISTORY.items.length - 1))}%"><i></i><b>${it.y}</b><span>${it.t}</span></div>`).join("")}
+        ${HISTORY.items.map((it, i) => `<div class="it ${i % 2 ? "dn" : "up"} a" style="--d:${1 + i * .4}s;left:${8 + i * (84 / (HISTORY.items.length - 1))}%"><i></i><b>${it.y}</b><span>${it.t}</span></div>`).join("")}
       </div>
     </div>` }),
 
@@ -210,7 +210,7 @@ const TEMPLATES = {
     <div class="body">
       <div class="kicker a" ${d(0)}>${ENERGY.kicker} · fondy EU a výzkum</div>
       <h2 class="a" ${d(.2)}>Projekty, na kterých pracujeme</h2>
-      <div class="grants">${ENERGY.grants.map((g, i) => `<div class="g a" ${d(.6 + i * .45)}><span class="pill green">${g.tag}</span><b>${g.n}</b><p>${g.d}</p></div>`).join("")}</div>
+      <div class="grants">${ENERGY.grants.map((g, i) => `<div class="g a" ${d(.5 + i * .25)}><span class="pill green">${g.tag}</span><b>${g.n}</b><p>${g.d}</p></div>`).join("")}</div>
     </div>` }),
 
   engine: () => ({ html: `
@@ -229,7 +229,7 @@ const TEMPLATES = {
     <div class="body">
       <div class="kicker a" ${d(0)}>Tepelný plynový motor</div>
       <h2 class="a" ${d(.2)}>${ENGINE.roadmapTitle}</h2>
-      <div class="road">${ENGINE.roadmap.map((r, i) => `<div class="r${r.now ? " now" : ""} a" ${d(.8 + i * .8)}><div class="y">${r.y}</div><b>${r.t}</b><p>${r.d}</p></div>`).join("")}</div>
+      <div class="road">${ENGINE.roadmap.map((r, i) => `<div class="r${r.now ? " now" : ""} a" ${d(.6 + i * .4)}><div class="y">${r.y}</div><b>${r.t}</b><p>${r.d}</p></div>`).join("")}</div>
     </div>` }),
 
   step1: () => ({ html: `
@@ -313,6 +313,7 @@ function buildShow() {
     const t = TEMPLATES[s.type](s);
     const node = el("div", "s s-" + s.type, t.html);
     $("slides").appendChild(node);
+    if (s.sec) { const pf = Math.min(CONFIG.photoFadeSeconds, s.sec / Math.max(1, node.querySelectorAll(".photos .ph").length) * .5); node.dataset.pfade = pf; node.style.setProperty("--pfade", pf + "s"); }   // krátký snímek: rychlejší prolnutí fotek
     if (s.audio) { node.dataset.pfade = VOICE.photoFadeSeconds; node.style.setProperty("--pfade", VOICE.photoFadeSeconds + "s"); }
     node.querySelectorAll("img[data-zoom]").forEach(img => img.complete ? sizePrint(img) : img.addEventListener("load", () => sizePrint(img)));
     show.slides.push({ node, spec: s, t, read: readSeconds(node),

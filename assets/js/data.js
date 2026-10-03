@@ -51,16 +51,16 @@ const SEQUENCE = [
   { type: "tale", id: "privatizace", chapter: "Historie", audio: "02-privatizace-1992.mp3" },
   { type: "tale", id: "rozvoj",      chapter: "Historie", audio: "03-rozvoj.mp3" },
   { type: "tale", id: "lis",         chapter: "Historie", audio: "04-lis-zdas-2008.mp3" },
-  { type: "history",  chapter: "Historie", sec: 12 },   // poslední rok se objeví v 9. s, pak už jen krátce na dočtení
+  { type: "history",  chapter: "Historie", sec: 6 },    // zkráceno na polovinu (klient 3. 10.)
   { type: "msv",      chapter: "MSV Brno", k: 1.8, audio: "05-msv-brno.mp3" },
   { type: "certs",    chapter: "Certifikáty", k: 1.4, audio: "06-certifikaty.mp3" },
   { type: "tale", id: "fve",         chapter: "O firmě", audio: "07-fotovoltaika.mp3" },
   { type: "tale", id: "zakazky",     chapter: "O firmě", k: 1.6, audio: "08-zakazky.mp3" },
   { type: "tale", id: "statek",      chapter: "O firmě", k: 1.4, audio: "09-obchodni-oddeleni.mp3" },
   { type: "tale", id: "lide",        chapter: "O firmě", audio: "10-pracovnici.mp3" },
-  { type: "intro",    chapter: "Psali o nás", sec: 7 },    // údaje z původního úvodu (bod 1 e-mailu 30. 9.)
+  { type: "intro",    chapter: "Psali o nás", sec: 4 },    // údaje z původního úvodu (bod 1 e-mailu 30. 9.)
   { type: "pressIntro", chapter: "Psali o nás", k: 0.8, audio: "11-technicky-magazin.mp3" },
-  { type: "article", y: 2016, chapter: "Psali o nás", sec: 14 },
+  { type: "article", y: 2016, chapter: "Psali o nás", sec: 7 },
   { type: "article", y: 2017, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2018, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2019, chapter: "Psali o nás", k: 1.25 },
@@ -70,9 +70,9 @@ const SEQUENCE = [
   { type: "article", y: 2025, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2026, chapter: "Psali o nás", k: 1.25 },
   { type: "energy",   chapter: "Energie a dotace", k: 1.3, audio: "12-energie-a-dotace.mp3" },
-  { type: "grants",   chapter: "Energie a dotace", sec: 11 },
+  { type: "grants",   chapter: "Energie a dotace", sec: 5.5 },
   { type: "engine",   chapter: "Tepelný motor", k: 1.3, audio: "13-tepelny-motor.mp3" },
-  { type: "roadmap",  chapter: "Tepelný motor", sec: 9 },
+  { type: "roadmap",  chapter: "Tepelný motor", sec: 4.5 },
   { type: "step1",    chapter: "4 kroky", k: 1.2, audio: "14-ctyri-kroky.mp3" },
   { type: "step2",    chapter: "4 kroky", k: 1.3 },
   { type: "step3",    chapter: "4 kroky", k: 1.2 },
