@@ -92,9 +92,6 @@ img { display: block; }
 #soundAsk { position: absolute; top: calc(var(--top) + 1rem); left: 0; right: 0; margin: 0 auto; width: fit-content; z-index: 6; display: flex; align-items: center; gap: 1rem; padding: 1rem 2rem; border-radius: 99rem; background: var(--heat); color: #2a1200; font-weight: 800; font-size: 1.6rem; box-shadow: var(--shadow); animation: pulse 2s ease-in-out infinite; white-space: nowrap; pointer-events: none; }
 #soundAsk span { font-size: 2rem; }
 
-/* číslo verze – malý nenápadný údaj pro kontrolu, že běží aktuální verze */
-#ver { position: absolute; left: 3rem; bottom: .25rem; z-index: 6; font-size: .8rem; color: rgba(255,255,255,.35); pointer-events: none; }
-
 /* spodní lišta: kapitoly + výzva k dotyku */
 .show-bar { position: absolute; left: 0; right: 0; bottom: 0; height: var(--bot); display: flex; align-items: center; gap: 2.4rem; padding: 0 3rem; z-index: 5; pointer-events: none;
   background: linear-gradient(0deg, rgba(0,0,0,.7), rgba(0,0,0,0)); }
