@@ -307,6 +307,7 @@ const secOf = sl => {
 };
 
 function buildShow() {
+  $("ver").textContent = "verze " + (window.APP_VER || "");
   $("topFair").textContent = CONFIG.fairName;
   $("topFairSub").textContent = CONFIG.fairDates + " · " + CONFIG.stand;
   PLAY.forEach(s => {

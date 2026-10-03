@@ -7,7 +7,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Strojírny Olšovec – MSV Brno 2026</title>
 <link rel="icon" href="assets/img/logo.png">
-<link rel="stylesheet" href="assets/css/app.css?v=2026-10-03d">
+<script>
+/* Verze obsahu. Při každé změně zvyšte všude v tomto souboru i v souboru verze.txt.
+   Na webu se podle verze.txt pozná, že prohlížeč drží starou stránku z mezipaměti, a načte se nová. */
+var APP_VER = "2026-10-03e";
+if (location.protocol !== "file:") fetch("verze.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : ""; }).then(function (t) {
+  t = t.trim();
+  if (t && t !== APP_VER && location.search.indexOf("v=" + t) < 0) location.replace(location.pathname + "?v=" + encodeURIComponent(t));
+}).catch(function () {});
+</script>
+<link rel="stylesheet" href="assets/css/app.css?v=2026-10-03e">
 </head>
 <body>
 
@@ -22,6 +31,7 @@
 
   <div id="soundAsk" class="hidden"><span>🔊</span>Dotkněte se obrazovky pro zapnutí zvuku</div>
 
+  <div id="ver"></div>
   <footer class="show-bar">
     <div class="chapters" id="chapters"></div>
     <div class="touch-cta"><span class="hand">👆</span><span>Dotkněte se obrazovky<small>a spočítejte si návratnost</small></span></div>
@@ -173,7 +183,7 @@
   </svg>
 </template>
 
-<script src="assets/js/data.js?v=2026-10-03d"></script>
-<script src="assets/js/app.js?v=2026-10-03d"></script>
+<script src="assets/js/data.js?v=2026-10-03e"></script>
+<script src="assets/js/app.js?v=2026-10-03e"></script>
 </body>
 </html>
