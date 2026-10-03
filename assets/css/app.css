@@ -424,7 +424,7 @@ img { display: block; }
 .s-step3 .formula .box small { font-size: 1.15rem; }
 .s-step3 .formula .res { font-size: 2.5rem; }
 .s-step3 .closing, .s-step4 .closing { font-size: 1.7rem; }
-.s-step4 .lead { font-size: 1.7rem; }
+.s-step4 .lead { font-size: 1.7rem; max-width: none; }
 .s-step4 .cases .c { padding: 1.8rem; }
 .s-step4 .cases .c .h { font-size: 2.2rem; }
 .s-step4 .cases .c table { font-size: 1.5rem; }

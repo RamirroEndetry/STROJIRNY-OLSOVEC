@@ -14,6 +14,14 @@ Bez internetu, bez instalace, bez serveru – stačí otevřít `index.html` v E
 3. Na místě: vypnout spořič obrazovky a uspávání displeje, vypnout aktualizace na dobu veletrhu,
    přidat `.bat` do složky *Po spuštění* (`shell:startup`).
 
+### Varianta: jeden soubor EXE
+
+Ve složce `EXE` (o úroveň výš) je **`Strojirny Olsovec - prezentace MSV 2026.exe`** – celá prezentace v jednom souboru.
+Po spuštění se rozbalí do `%LOCALAPPDATA%\StrojirnyOlsovec-kiosk` a otevře v Edge/Chrome v kiosk režimu se zvukem
+(stejně jako `.bat`). Ukončení: `Alt + F4`. Po změně obsahu je potřeba EXE znovu sestavit: `python _exe-zdroj/sestavit.py`.
+EXE není digitálně podepsaný – při prvním spuštění na jiném počítači může Windows SmartScreen zobrazit varování
+(*Další informace → Přesto spustit*).
+
 ## Pořadí prezentace (smyčka cca 12 minut)
 
 Podle e-mailu klienta z 21. 9. (bod 3), doplněno podle připomínek z 29. 9. a 30. 9.:

@@ -43,6 +43,7 @@ const VOICE = {
    type  = šablona snímku (viz app.js), chapter = kapitola na spodní liště,
    k     = násobek minimální délky snímku (1 = slideSeconds)
    audio = nahrávka mluveného slova (soubor ve VOICE.folder), nepovinné
+   sec   = pevná délka snímku v sekundách (má přednost před k i délkou textu; připomínky klienta 3. 10.)
    Snímky s delším textem se prodlouží automaticky (readingWpm).
    Pořadí podle e-mailu klienta z 30. 9. 2026 (body 2–9), pak původní obsah.  */
 const SEQUENCE = [
@@ -50,16 +51,16 @@ const SEQUENCE = [
   { type: "tale", id: "privatizace", chapter: "Historie", audio: "02-privatizace-1992.mp3" },
   { type: "tale", id: "rozvoj",      chapter: "Historie", audio: "03-rozvoj.mp3" },
   { type: "tale", id: "lis",         chapter: "Historie", audio: "04-lis-zdas-2008.mp3" },
-  { type: "history",  chapter: "Historie", k: 1.3 },
+  { type: "history",  chapter: "Historie", sec: 18 },
   { type: "msv",      chapter: "MSV Brno", k: 1.8, audio: "05-msv-brno.mp3" },
   { type: "certs",    chapter: "Certifikáty", k: 1.4, audio: "06-certifikaty.mp3" },
   { type: "tale", id: "fve",         chapter: "O firmě", audio: "07-fotovoltaika.mp3" },
   { type: "tale", id: "zakazky",     chapter: "O firmě", k: 1.6, audio: "08-zakazky.mp3" },
   { type: "tale", id: "statek",      chapter: "O firmě", k: 1.4, audio: "09-obchodni-oddeleni.mp3" },
   { type: "tale", id: "lide",        chapter: "O firmě", audio: "10-pracovnici.mp3" },
-  { type: "intro",    chapter: "Psali o nás", k: 0.9 },    // údaje z původního úvodu (bod 1 e-mailu 30. 9.)
+  { type: "intro",    chapter: "Psali o nás", sec: 10 },    // údaje z původního úvodu (bod 1 e-mailu 30. 9.)
   { type: "pressIntro", chapter: "Psali o nás", k: 0.8, audio: "11-technicky-magazin.mp3" },
-  { type: "article", y: 2016, chapter: "Psali o nás", k: 1.25 },
+  { type: "article", y: 2016, chapter: "Psali o nás", sec: 20 },
   { type: "article", y: 2017, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2018, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2019, chapter: "Psali o nás", k: 1.25 },
@@ -69,9 +70,9 @@ const SEQUENCE = [
   { type: "article", y: 2025, chapter: "Psali o nás", k: 1.25 },
   { type: "article", y: 2026, chapter: "Psali o nás", k: 1.25 },
   { type: "energy",   chapter: "Energie a dotace", k: 1.3, audio: "12-energie-a-dotace.mp3" },
-  { type: "grants",   chapter: "Energie a dotace", k: 1.3 },
+  { type: "grants",   chapter: "Energie a dotace", sec: 20 },
   { type: "engine",   chapter: "Tepelný motor", k: 1.3, audio: "13-tepelny-motor.mp3" },
-  { type: "roadmap",  chapter: "Tepelný motor", k: 1.2 },
+  { type: "roadmap",  chapter: "Tepelný motor", sec: 15 },
   { type: "step1",    chapter: "4 kroky", k: 1.2, audio: "14-ctyri-kroky.mp3" },
   { type: "step2",    chapter: "4 kroky", k: 1.3 },
   { type: "step3",    chapter: "4 kroky", k: 1.2 },
@@ -275,7 +276,7 @@ const ARTICLES = [
   {
     y: 2019, title: "Poctivá strojařina z Olšovce",
     src: "TechMagazín 10/2019", pages: ["assets/img/pages/2019-1.jpg", "assets/img/pages/2019-2.jpg"],
-    photos: ["assets/img/2019-mlyn.jpg", "assets/img/2019-obrabeni.jpg", "assets/img/2019-hx635b.jpg", "assets/img/2019-jednaci-mistnost.jpg"],
+    photos: ["assets/img/2019-mlyn.jpg", "assets/img/2019-obrabeni.jpg", "assets/img/2019-hx635b.jpg"],
     points: [
       "Historie areálu sahá do roku 1902 – ke kamenolomu stavitele Augustina Janečky",
       "Obrábíme od desítek kilogramů po součásti o hmotnosti několika tun",
@@ -418,6 +419,7 @@ const STEPS = {
     ],
     note: "Zásadní je elektřinu spotřebovat uvnitř závodu, ne ji prodávat do sítě.",
   },
+  paybackLead: "Výkon 100 kW – Investice 6 mil. Kč – Cena nakupované elektřiny 3,50 Kč/kWh – Náklady na servis 200 000 Kč/rok",
   cases: [
     { n: "Cementárna", i: "🏭", mwh: 750, value: "2,63 mil. Kč", net: "2,43 mil. Kč", payback: "≈ 2,5 roku" },
     { n: "Cihelna", i: "🧱", mwh: 650, value: "2,28 mil. Kč", net: "2,075 mil. Kč", payback: "≈ 2,9 roku" },

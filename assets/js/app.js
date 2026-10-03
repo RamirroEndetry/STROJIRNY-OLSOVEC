@@ -266,7 +266,7 @@ const TEMPLATES = {
   step4: () => ({ html: `
     <div class="body">
       ${stepHead(4)}
-      <p class="lead a" ${d(.3)}>Výkon 100 kW · investice 6 mil. Kč · 3,50 Kč/kWh · servis 200 000 Kč/rok</p>
+      <p class="lead a" ${d(.3)}>${STEPS.paybackLead}</p>
       <div class="cases">${STEPS.cases.map((c, i) => `<div class="c a" ${d(.8 + i * .7)}><div class="h"><span>${c.i}</span>${c.n}</div><table><tr><td>Vyrobená elektřina</td><td>cca ${c.mwh} MWh/rok</td></tr><tr><td>Hodnota</td><td>cca ${c.value}/rok</td></tr><tr><td>Čistý roční efekt</td><td>cca ${c.net}</td></tr></table><div class="pb">Návratnost<b>${c.payback}</b></div></div>`).join("")}</div>
       <div class="closing a" ${d(3.4)}>${STEPS.closing}</div>
     </div>` }),
@@ -302,6 +302,7 @@ function readSeconds(node) {
 const secOf = sl => {
   const vd = settings.voiceVolume > 0 ? voiceDur(sl.spec) : 0;
   if (vd) return Math.max(vd + VOICE.delaySeconds + VOICE.tailSeconds, sl.photos * VOICE.minPhotoSeconds, sl.anim + 1.5);
+  if (sl.spec.sec) return Math.max(sl.spec.sec, sl.anim + 2);   // pevná délka, nejméně do konce animací
   return Math.max(3, settings.slideSeconds * (sl.spec.k || 1), sl.read);
 };
 
